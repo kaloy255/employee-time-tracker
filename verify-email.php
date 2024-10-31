@@ -1,10 +1,8 @@
 <?php
     session_start();
     require "database.php";
-    
-   
- 
-  
+
+    $code_error = "";
     if(isset($_POST['submit'])){
         $box_1 = $_POST['box-1'];
         $box_2 = $_POST['box-2'];
@@ -16,10 +14,11 @@
         $userId =  $_SESSION['id']; // User's ID
         $verify_code = md5($box_1. $box_2. $box_3. $box_4. $box_5. $box_6); // get the value of 6 input on form then make it hash to match the token generate in database
 
-            // Prepare and execute the SQL query
+
+        // check email if already exists
         $sql = "SELECT * FROM employee WHERE id = $userId";
         $result = mysqli_query($conn, $sql);
-        
+       
         date_default_timezone_set('Asia/Manila');
         if (mysqli_num_rows($result) > 0) {
             
@@ -27,13 +26,13 @@
             while($row = mysqli_fetch_assoc($result)) {
                 
                 if ($row['verify_token'] === $verify_code && strtotime($row['expiration_token']) > time()) {
+                    echo  "sdads";
                     $update_query = "UPDATE employee set verified = 'yes' WHERE id = $userId";
                     mysqli_query($conn, $update_query);
-                    $_SESSION['status'] = 'valid';
                     $_SESSION['fullname'] = $row['fullname'];
                     header("Location: login.php");
                 }else{
-                    echo "failed";
+                    $code_error =  "Wrong code or expired";
                 }
             }
         } else {
@@ -43,6 +42,10 @@
         mysqli_close($conn);
        
 
+    }
+
+    if(isset($_POST['resend-code'])){
+        // resend again the code using session email
     }
 
 
@@ -77,14 +80,12 @@
         <span class="mainHeading text-3xl font-semibold">Enter OTP</span>
         <p class="otpSubheading  text-center">We have sent a verification code to your mobile number</p>
     </div>
-    <div>
-        <!-- <?php if (empty($error)) : ?>
-        <span class="text-green-500"><?=$success?></span>
-        <?php else : ?>
-        <span class="text-red-500"><?= $error ?></span>
-        <?php endif; ?> -->
-      
 
+    <div class="text-center">
+        <!-- error message -->
+        <span class="text-red-500 "><?= $code_error; ?></span>
+      
+        
         <div class="inputContainer flex space-x-3 ">
             <input required maxlength="1" type="text" class="otp-input w-12 h-12 text-center border border-[#999999] rounded-lg focus:outline-none focus:border-2 focus:border-[#62F3FF] bg-transparent"
             name="box-1">
@@ -112,7 +113,7 @@
    
     
     <p class="resendNote tracking-wider text-sm">Didn't receive the code? 
-        <button class="resendBtn text-[#62F3FF]  hover:underline focus:outline-none">Resend Code</button>
+        <button class="resendBtn text-[#62F3FF]  hover:underline focus:outline-none" type="submit" name="resend-code">Resend Code</button>
     </p>
     </form>
 

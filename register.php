@@ -2,7 +2,6 @@
     session_start();
     require "database.php";
     require "countries.php";
-    require "expiration-token.php";
    
 
     use PHPMailer\PHPMailer\PHPMailer;
@@ -11,6 +10,7 @@
     
     //Load Composer's autoloader
     require 'vendor/autoload.php';
+    // funtion mail sender
     function sendmail_verify($email,$fullname, $verificationCode){
         //Create an instance; passing `true` enables exceptions
     $mail = new PHPMailer(true);
@@ -77,6 +77,10 @@
     }
     
     }
+
+
+    // set to ph time
+    date_default_timezone_set('Asia/Manila');
   
     //   error message
     $pass_error = "";
@@ -98,8 +102,8 @@
         $country = trim($_POST['country']);
         $role = "employee";
         
-        // set to ph time
-        date_default_timezone_set('Asia/Manila');
+        
+        
         // set the expiration the on token
         $expiration = date("Y-m-d H:i:s", strtotime("+10 minutes"));
         // generate verification token
@@ -108,29 +112,27 @@
         $hash_verify_code = md5($verificationCode);
  
 
-            // check if the password is > 8 and < 32 and  alphanumeric and if match
+        //    check the password if contain alpha numeric and match
             $chk_password = $_POST['password'];
             $chk_cpassword = $_POST['confirm_password'];
-            if (strlen($chk_password) < 8 || strlen($chk_password) > 32) {
-                $pass_error = "Password must be between 8 and 32 characters.";
-            } elseif (!preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password)) {
+            if (!preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password)) {
                 $pass_error = "Password must contain at least one letter and one number.";
             }elseif($chk_password !== $chk_cpassword){
                 $pass_error = "Passwords do not match.";   
             }
 
             // check if employee not choosing a country
-            if($country == "null"){
+            if($country === "null"){
                 $country_error = "Please Choose Your Country";
 
             }
 
             // check if email is already exists
-            $chk_email = "SELECT email From employee WHERE email = '$email' LIMIT 1";
+            $chk_email = "SELECT email From employee WHERE email = '$email'";
             $chk_email_query = mysqli_query($conn, $chk_email);
             
             // check is have errors
-            if(mysqli_num_rows($chk_email_query) > 0 || !empty($pass_error) || !empty($email_error) || !empty($country_error)){
+            if(mysqli_num_rows($chk_email_query) > 0 || !empty($pass_error) || !empty($email_error) || empty($country)){
                 $email_error = 'Email already Exists';
 
             }else{
@@ -147,6 +149,7 @@
                     sendmail_verify($email, $fullname, $verificationCode);
 
                     $_SESSION['id'] = $last_id;
+                    $_SESSION['email'] = $email;
                     $_SESSION['verify_code'] = $hash_verify_code;
                     header("Location: verify-email.php");
 
@@ -155,11 +158,6 @@
                 }
 
             }
-
-
-        
-       
-      
     }
 
 
@@ -252,7 +250,8 @@
                         <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
                             name="password"
                             type="password"
-                           
+                            minlength="8"
+                            maxlength="32"
                             required>
                         <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                             Password
@@ -263,7 +262,8 @@
                         <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
                             name="confirm_password"
                             type="password"
-                            
+                            minlength="8"
+                            maxlength="32"
                             required>
                         <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                             Confirm password

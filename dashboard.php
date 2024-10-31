@@ -4,11 +4,7 @@ require "calculate_time_gap.php";
 require "session.php"; 
 date_default_timezone_set('Asia/Manila');
 
-// Check if employee is logged in
-if (!isset($_SESSION['id'])) {
-    echo "You are not logged in!";
-    exit();
-}
+
 
 $employee_id = $_SESSION['id'];
 

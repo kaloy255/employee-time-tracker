@@ -1,7 +1,6 @@
 <?php
     session_start();
     require "database.php";
-    require "expiration-token.php";
 
     // Functions 
     function pathTo($destination) {
@@ -21,13 +20,13 @@
     if ($_SESSION['status'] == 'valid') {
         pathTo('dashboard');
     }
-
+    // error message
+    $error_message = "";
     if(isset($_POST['login'])){
         $email = $_POST['email'];
         $password = md5($_POST['password']);
 
         $login_query = "SELECT * FROM employee WHERE email = '$email' AND password = '$password' AND verified = 'yes'";
-
         $result = $conn->query($login_query);
 
         if ($result->num_rows > 0) {
@@ -41,6 +40,7 @@
                 header("Location: dashboard.php");
             }
         }else{
+            $error_message = "Wrong email or password";
             $_SESSION['status'] = 'invalid';
         }
         
@@ -81,6 +81,7 @@
 
             <div class="flex flex-col gap-6">
                 <div class="relative font-sans w-full">
+                    <span class="text-sm text-red-500"><?=$error_message?></span>
                     <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
                         name="email"
                         type="email"

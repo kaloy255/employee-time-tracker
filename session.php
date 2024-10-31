@@ -1,7 +1,5 @@
 <?php 
-  function pathTo($destination) {
-    echo "<script>window.location.href ='/employee-time-tracker/$destination.php'</script>";
-  }
+
 
   if ($_SESSION['status'] == 'invalid' || empty($_SESSION['status'])) {
     /* Set status to invalid */
