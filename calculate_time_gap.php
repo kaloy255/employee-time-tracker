@@ -1,6 +1,7 @@
 <?php
     session_start();
     require "database.php";
+    require "session.php";
     $employee_id = $_SESSION['id'];
     date_default_timezone_set('Asia/Manila');
 

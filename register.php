@@ -1,6 +1,9 @@
 <?php
-    require "database.php";
     session_start();
+    require "database.php";
+    require "countries.php";
+    require "expiration-token.php";
+   
 
     use PHPMailer\PHPMailer\PHPMailer;
     use PHPMailer\PHPMailer\SMTP;
@@ -183,7 +186,7 @@
         <div class="border-2 h-[840px] w-[840px] fixed -top-40 -right-40 rounded-full  bg-[#62F3FF] opacity-5 blur-3xl"></div>
     </div>
 
-    <form action="" method="post" id="form" class="w-1/2 flex flex-col gap-10 mt-[14rem] ml-[15rem] z-10">
+    <form action="" method="post" id="form" class="w-1/2  flex flex-col gap-10 mt-[14rem] ml-[15rem] z-10">
        
         <div>
             <p id="h-text" class="text-4xl font-semibold mb-2">Create Account</p>
@@ -323,11 +326,13 @@
                         Postcode
                     </label>
                 </div>
-                <div class="w-1/4">
-                    <select class="w-full p-[9px] bg-transparent  border border-[#38373E] rounded-xl  text-[#757575]" name="country" required>
-                        <option value="null" class="bg-[#09080F]">Select a country</option>
-                        <option value="america" class=" bg-[#09080F] ">america</option>
-                        <option value="pelepens" class="bg-[#09080F]">pelepens</option>
+                <div class="w-1/4 ">
+                    <select  class="w-full p-[9px] bg-transparent  border border-[#38373E] rounded-xl  text-[#757575] relative" name="country" required>
+                        <option value="null"  class="bg-[#29282F] text-white">Select your country</option>
+                        <?php foreach ($countries as $country): ?>
+                            <option value="<?php echo htmlspecialchars($country); ?>" class="bg-[#29282F] text-white"><?php echo htmlspecialchars($country); ?></option>
+                        <?php endforeach; ?>
+                                    
                     </select>
                     <span class="text-red-500"><?=$country_error?></span>
                 </div>
@@ -343,17 +348,33 @@
 
 
 <style>
-  /* Chrome, Safari, Edge, Opera */
-  .no-spinner::-webkit-outer-spin-button,
-  .no-spinner::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
 
-  /* Firefox */
-  .no-spinner[type=number] {
-    -moz-appearance: textfield;
-  }
+    /* design scroll option tags */
+    select::-webkit-scrollbar {
+        width: 8px; /* Width of the scrollbar */
+    }
+
+    select::-webkit-scrollbar-track {
+    background-color: #38373E; /* Track color */
+    }
+
+
+    select::-webkit-scrollbar-thumb{
+    background-color: #555; /* Hover color */
+    border-radius: 10px;
+    }
+
+    /* Chrome, Safari, Edge, Opera */
+    .no-spinner::-webkit-outer-spin-button,
+    .no-spinner::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    .no-spinner[type=number] {
+        -moz-appearance: textfield;
+    }
   
   @media only screen and (max-width: 1440px) {
 

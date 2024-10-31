@@ -1,5 +1,4 @@
 <?php
-
 require "database.php"; 
 require "calculate_time_gap.php";
 require "session.php"; 

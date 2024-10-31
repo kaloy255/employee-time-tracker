@@ -1,6 +1,7 @@
 <?php
     session_start();
     require "database.php";
+    require "expiration-token.php";
 
     // Functions 
     function pathTo($destination) {
