@@ -1,13 +1,12 @@
 <?php
 require "database.php"; 
-require "calculate_time_gap.php";
-require "session.php"; 
+require "fetch.php"; 
+
 date_default_timezone_set('Asia/Manila');
 
 
 
 $employee_id = $_SESSION['id'];
-
 // Handle Clock In
 if (isset($_POST['start'])) {
     $date = date('Y-m-d');
@@ -55,6 +54,7 @@ if (isset($_POST['stop'])) {
     }
 }
 
+
 ?>
 
 <!DOCTYPE html>
@@ -72,58 +72,43 @@ if (isset($_POST['stop'])) {
 </head>
 <body>
 
-<?php echo $_SESSION['status']?>
-<?php echo $_SESSION['id']?>
-<?php echo $_SESSION['fullname']?>
-<?php echo $_SESSION['email']?>
-<a href="logout.php"> logout</a>
-<div class="timer" id="timer">00:00:00</div>
+   
+    <a href="logout.php"> logout</a>
+    <div class="timer" id="timer">00:00:00</div>
 
-<form id="timeInForm" action="" method="POST">
-    <input type="submit" id="timeInButton" value="Clock In" name="start">
-</form>
+    <form id="timeInForm" action="" method="POST">
+        <input type="submit" id="timeInButton" value="Clock In" name="start">
+    </form>
 
-<form id="timeOutForm" action="" method="POST" style="display: none;">
-    <input type="submit" id="timeOutButton" value="Clock Out" name="stop">
-</form>
+    <form id="timeOutForm" action="" method="POST" style="display: none;">
+        <input type="submit" id="timeOutButton" value="Clock Out" name="stop">
+    </form>
 
-<div>
-    <h1>Total Hours Worked</h1>
+    <div>
+        <h1>Total Hours Worked</h1>
+    </div>
+
     <?php
-    // Fetch total hours worked
-    $query_daily_session = "SELECT * FROM daily_session WHERE employee_id = $employee_id ORDER BY date DESC";
-    $daily_result = mysqli_query($conn, $query_daily_session);
-
-    if (!$daily_result) {
-        echo "Error fetching daily sessions: " . mysqli_error($conn);
-    } else {
-        if ($daily_result->num_rows > 0) {
-            while ($row = $daily_result->fetch_assoc()) {
-                
-                $hours = floor($row["time_consumed"] / 3600);
-                $minutes = floor(($row["time_consumed"] % 3600) / 60);
-                $seconds = $row["time_consumed"] % 60;
-                $ot_hours = floor($row["over_time"] / 3600);
-                $ot_minutes = floor(($row["over_time"] % 3600) / 60);
-                $ot_seconds = $row["over_time"] % 60;
-
-                // Create a DateTime object
-                $dateTime = new DateTime($row['date']);
-                // Convert to human-readable format (Month Day, Year)
-                $readableDate = $dateTime->format('F j, Y');
-                echo "<strong>" . $_SESSION['fullname'] . "</strong><br>";
-                
-
-                echo "time consumed: ".$hours."h:". $minutes. "min:". $seconds. "sec <br>";
-                echo "Over time: ".$ot_hours."h:". $ot_minutes. "min:". $ot_seconds. "sec <br>";
-            }
-        } else {
-            echo "0 results";
-        }
-        
+    foreach($time_entries as  $time){
+        echo "Time Stopped at:  ".$time."<br>";
     }
     ?>
-</div>
+<!-- 
+    need to use loopings to get the past dily session of employee -->
+    <div>
+        <p><?=$readableDate;?></p>
+        <p>Total time consumed: <?=$hours?>Hours <?=$minutes?>minutes <?=$seconds;?>seconds</p>
+        <p>Overtime: <?=$ot_hours?>Hours <?=$ot_minutes?>minutes <?=$ot_seconds;?>seconds</p>
+    </div>
+</body>
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
 
 <script>
     // Timer variables
@@ -181,9 +166,8 @@ if (isset($_POST['stop'])) {
         document.getElementById('timeInButton').style.display = 'block';
         timerDisplay.textContent = "00:00:00";
     });
+
 </script>
 
 
-
-</body>
 </html>

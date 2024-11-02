@@ -2,6 +2,7 @@
     session_start();
     require "database.php";
 
+    
     // Functions 
     function pathTo($destination) {
         echo "<script>window.location.href = '$destination.php'</script>";
@@ -80,8 +81,8 @@
         </div>
 
             <div class="flex flex-col gap-6">
+                <span class="text-sm text-red-500"><?=$error_message?></span>
                 <div class="relative font-sans w-full">
-                    <span class="text-sm text-red-500"><?=$error_message?></span>
                     <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
                         name="email"
                         type="email"
@@ -106,7 +107,7 @@
            
         <div class="w-full flex justify-betweem">
             <div class="w-4/5">
-                <a href="forgot.php" class="hover:underline text-[#999999]">Forgot password?</a>
+                <a href="recovery.php" class="hover:underline text-[#999999]">Forgot password?</a>
             </div>
              
             <div class="w-1/5 z-10">
