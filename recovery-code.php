@@ -14,8 +14,11 @@
 
         if (mysqli_num_rows($result) > 0) {
             while($row = mysqli_fetch_assoc($result)) {
-                //get the fullname of employee base on email
-                $fullname = $row['fullname'];
+                //get the fullname of employee base on email insert t osession variable
+                $_SESSION['fullname'] = $row['fullname'];
+                // resign this to variable
+                $fullname = $_SESSION['fullname'];
+
                 // convert into hash alphanumeric the aot code for recovery
                 $hash_code = md5($reset_code);
                 $_SESSION['recovery-email'] = $email;
@@ -40,5 +43,4 @@
 
 
     }
-
 ?>

@@ -39,6 +39,7 @@
                         // update the employee password
                         $update_password = "UPDATE employee SET `password` = '$password' WHERE email = '$email'";
                         mysqli_query($conn, $update_password);
+                        session_destroy();
                         header("Location: login.php");
                     }
                 
@@ -65,6 +66,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="fonts.CSS">
+    <link rel="icon" href="assets/fav-icon.svg" type="image/x-icon">
 </head>
 <body class="h-screen bg-gradient-to-bl from-[#29282F] to-[#09080F] relative   text-white urbanist flex justify-center items-center">
     

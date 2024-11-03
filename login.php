@@ -2,15 +2,14 @@
     session_start();
     require "database.php";
 
-    
     // Functions 
     function pathTo($destination) {
         echo "<script>window.location.href = '$destination.php'</script>";
     }
 
 
-    
-    if ($_SESSION['status'] == 'invalid' || empty($_SESSION['status'])) {
+    // Check if 'status' key is set in the session, if not, set it to 'invalid'
+    if (!isset($_SESSION['status']) || $_SESSION['status'] == 'invalid'){
         //Set Default Invalid 
         $_SESSION['status'] = 'invalid';  
         
@@ -62,6 +61,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="fonts.CSS">
+    <link rel="icon" href="assets/fav-icon.svg" type="image/x-icon">
 </head>
 <body class="h-screen bg-gradient-to-bl from-[#29282F] to-[#09080F] relative overflow-hidden text-white urbanist">
     <div>

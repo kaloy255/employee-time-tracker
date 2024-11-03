@@ -62,7 +62,8 @@ if (isset($_POST['stop'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Time Tracking</title>
+    <title>TimeisBlue</title>
+    <link rel="icon" href="assets/fav-icon.svg" type="image/x-icon">
     <style>
         #timer {
             font-size: 20px;

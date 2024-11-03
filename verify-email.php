@@ -1,6 +1,8 @@
 <?php
     session_start();
     require "database.php";
+    require "sendmail.php";
+    date_default_timezone_set('Asia/Manila');
 
     $code_error = "";
     if(isset($_POST['submit'])){
@@ -14,22 +16,22 @@
         $userId =  $_SESSION['id']; // User's ID
         $verify_code = md5($box_1. $box_2. $box_3. $box_4. $box_5. $box_6); // get the value of 6 input on form then make it hash to match the token generate in database
 
-
+       
         // check email if already exists
         $sql = "SELECT * FROM employee WHERE id = $userId";
         $result = mysqli_query($conn, $sql);
        
-        date_default_timezone_set('Asia/Manila');
+   
         if (mysqli_num_rows($result) > 0) {
             
-            // output data of each row
             while($row = mysqli_fetch_assoc($result)) {
                 
                 if ($row['verify_token'] === $verify_code && strtotime($row['expiration_token']) > time()) {
-                    echo  "sdads";
                     $update_query = "UPDATE employee set verified = 'yes' WHERE id = $userId";
                     mysqli_query($conn, $update_query);
-                    $_SESSION['fullname'] = $row['fullname'];
+                    // change
+                    // $_SESSION['fullname'] = $row['fullname'];
+                    session_destroy();
                     header("Location: login.php");
                 }else{
                     $code_error =  "Wrong code or expired";
@@ -43,12 +45,29 @@
        
 
     }
-
+    
     if(isset($_POST['resend-code'])){
-        // resend again the code using session email
+        $user_id = $_SESSION['id'];
+        $fullname = $_SESSION['fullname'];
+        $email = $_SESSION['email'];
+        $expiration = date("Y-m-d H:i:s", strtotime("+10 minutes"));
+
+        sendmail_reset_password($email, $fullname, $verificationCode);
+        $hash_code = md5($verificationCode);
+
+        $update_code = "UPDATE employee SET verify_token = '$hash_code', expiration_token = '$expiration' WHERE id = $user_id";
+        $result = mysqli_query($conn, $update_code);
+
+        if($result){
+            echo "<script>alert('Verification code has been resent successfully. Please check your email.');</script>";
+        }else{
+            echo "<script>alert('Failed to resend verification code. Please try again later.');</script>";
+        }
+      
+       
+        
     }
-
-
+    
 ?>
 
 <!DOCTYPE html>
@@ -62,6 +81,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="fonts.CSS">
+    <link rel="icon" href="assets/fav-icon.svg" type="image/x-icon">
 </head>
 <body class="h-screen bg-gradient-to-bl from-[#29282F] to-[#09080F] relative overflow-hidden text-white urbanist flex items-center justify-center">
    
@@ -72,50 +92,51 @@
         <div class="border-2 h-[840px] w-[840px] fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  rounded-full  bg-[#62F3FF] opacity-5 blur-3xl"></div>
     </div>
 
+    <div class="otp-Form flex flex-col items-center p-10  gap-8 min-w-[30%] h-1/2  rounded-lg shadow-lg border border-[#38373E] backdrop-blur-lg">
+        <form  method="post" class = "flex  flex-col items-center gap-8">
+            <img src="assets/logo.svg" alt="" class="w-32">
 
-    <form class="otp-Form flex flex-col justify-center items-center p-10  gap-8 min-w-[30%] h-1/2  rounded-lg shadow-lg border border-[#38373E] backdrop-blur-lg" method="post">
-        <img src="assets/logo.svg" alt="" class="w-32">
+            <div class="text-center leading-9">
+                <span class="mainHeading text-3xl font-semibold">Enter OTP</span>
+                <p class="otpSubheading  text-center">We have sent a verification code to your mobile number</p>
+            </div>
 
-    <div class="text-center leading-9">
-        <span class="mainHeading text-3xl font-semibold">Enter OTP</span>
-        <p class="otpSubheading  text-center">We have sent a verification code to your mobile number</p>
-    </div>
+            <div class="text-center">
+                <!-- error message -->
+                <span class="text-red-500 "><?= $code_error; ?></span>
+                
+                <div class="inputContainer flex space-x-3 ">
+                    <input required maxlength="1" type="text" class="otp-input w-12 h-12 text-center border border-[#999999] rounded-lg focus:outline-none focus:border-2 focus:border-[#62F3FF] bg-transparent"
+                    name="box-1">
 
-    <div class="text-center">
-        <!-- error message -->
-        <span class="text-red-500 "><?= $code_error; ?></span>
-      
+                    <input required maxlength="1" type="text" class="otp-input w-12 h-12 text-center border border-[#999999] rounded-lg focus:outline-none focus:border-2 focus:border-[#62F3FF] bg-transparent"
+                    name="box-2">
+
+                    <input required maxlength="1" type="text" class="otp-input w-12 h-12 text-center border border-[#999999] rounded-lg focus:outline-none focus:border-2 focus:border-[#62F3FF] bg-transparent"
+                    name="box-3">
+
+                    <input required maxlength="1" type="text" class="otp-input w-12 h-12 text-center border border-[#999999] rounded-lg focus:outline-none focus:border-2 focus:border-[#62F3FF] bg-transparent"
+                    name="box-4">
+
+                    <input required maxlength="1" type="text" class="otp-input w-12 h-12 text-center border border-[#999999] rounded-lg focus:outline-none focus:border-2 focus:border-[#62F3FF] bg-transparent"
+                    name="box-5">
+
+                    <input required maxlength="1" type="text" class="otp-input w-12 h-12 text-center border border-[#999999] rounded-lg focus:outline-none focus:border-2 focus:border-[#62F3FF] bg-transparent"
+                    name="box-6">
+                    
+                </div>
+            </div>
+
+            <button class="verifyButton bg-[#62F3FF] px-4 py-2 rounded-lg hover:bg-[#3DBEC9] font-semibold transition duration-200 text-black" type="submit" name="submit">Verify</button>
         
-        <div class="inputContainer flex space-x-3 ">
-            <input required maxlength="1" type="text" class="otp-input w-12 h-12 text-center border border-[#999999] rounded-lg focus:outline-none focus:border-2 focus:border-[#62F3FF] bg-transparent"
-            name="box-1">
+        </form>
+        <form action="" method="post">
+            <p class="resendNote tracking-wider text-sm">Didn't receive the code? 
+                <button class="resendBtn text-[#62F3FF]  hover:underline focus:outline-none" type="submit" name="resend-code">Resend Code</button>
+            </p>
+        </form>
 
-            <input required maxlength="1" type="text" class="otp-input w-12 h-12 text-center border border-[#999999] rounded-lg focus:outline-none focus:border-2 focus:border-[#62F3FF] bg-transparent"
-            name="box-2">
-
-            <input required maxlength="1" type="text" class="otp-input w-12 h-12 text-center border border-[#999999] rounded-lg focus:outline-none focus:border-2 focus:border-[#62F3FF] bg-transparent"
-            name="box-3">
-
-            <input required maxlength="1" type="text" class="otp-input w-12 h-12 text-center border border-[#999999] rounded-lg focus:outline-none focus:border-2 focus:border-[#62F3FF] bg-transparent"
-            name="box-4">
-
-            <input required maxlength="1" type="text" class="otp-input w-12 h-12 text-center border border-[#999999] rounded-lg focus:outline-none focus:border-2 focus:border-[#62F3FF] bg-transparent"
-            name="box-5">
-
-            <input required maxlength="1" type="text" class="otp-input w-12 h-12 text-center border border-[#999999] rounded-lg focus:outline-none focus:border-2 focus:border-[#62F3FF] bg-transparent"
-            name="box-6">
-            
-        </div>
     </div>
-
-    <button class="verifyButton bg-[#62F3FF] px-4 py-2 rounded-lg hover:bg-[#3DBEC9] font-semibold transition duration-200 text-black" type="submit" name="submit">Verify</button>
-    
-   
-    
-    <p class="resendNote tracking-wider text-sm">Didn't receive the code? 
-        <button class="resendBtn text-[#62F3FF]  hover:underline focus:outline-none" type="submit" name="resend-code">Resend Code</button>
-    </p>
-    </form>
 
 </body>
 </html>

@@ -1,7 +1,5 @@
 <?php 
     require "recovery-code.php"; 
-
-    
 ?>
 
 
@@ -16,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="fonts.CSS">
+    <link rel="icon" href="assets/fav-icon.svg" type="image/x-icon">
 </head>
 <body  class="h-screen bg-gradient-to-bl from-[#29282F] to-[#09080F] relative overflow-hidden text-white urbanist flex justify-center items-center">
 
