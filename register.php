@@ -59,9 +59,11 @@
             $chk_email_query = mysqli_query($conn, $chk_email);
             
             // check is have errors
-            if(mysqli_num_rows($chk_email_query) > 0 || !empty($pass_error) || !empty($email_error) || empty($country)){
+            if(mysqli_num_rows($chk_email_query) > 0){
                 $email_error = 'Email already Exists';
 
+            }elseif(!empty($pass_error) || !empty($email_error) || empty($country)){
+                
             }else{
                 // insert the employee data
                 $query_insert = "INSERT INTO employee (fullname, email, age, password, street_address, suburb, city, state, postcode, country, verify_token, expiration_token, role) VALUES('$fullname', '$email', $age, '$password', '$street_address', '$suburb','$city', '$state', '$postcode', '$country', '$hash_verify_code','$expiration', '$role')";

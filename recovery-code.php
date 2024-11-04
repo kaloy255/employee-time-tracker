@@ -4,7 +4,6 @@
     require "sendmail.php";
 
     //form error message
-    $_SESSION['recovery-message'] = "";
     if(isset($_POST['send_email_btn'])){
         $email = $_POST['email'];
 
