@@ -29,7 +29,6 @@
                 $insert_reset_code = "UPDATE employee SET reset_code = '$hash_code' WHERE email = '$email'";
                 mysqli_query($conn, $insert_reset_code);
 
-                $_SESSION['recovery-message'] = " ";
                 header("Location: verify-recovery.php");
                 
             }

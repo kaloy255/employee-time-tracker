@@ -63,16 +63,16 @@
     <link rel="stylesheet" href="fonts.CSS">
     <link rel="icon" href="assets/fav-icon.svg" type="image/x-icon">
 </head>
-<body class="h-screen bg-gradient-to-bl from-[#29282F] to-[#09080F] relative overflow-hidden text-white urbanist">
+<body class=" h-screen bg-gradient-to-bl from-[#29282F] to-[#09080F] relative overflow-hidden text-white urbanist">
     <div>
-        <img src="assets/r-logo.svg" alt="" class="fixed -top-1/4 left-1/2 transform -translate-x-1/2">
+        <img src="assets/r-logo.svg" alt="" class="fixed -top-1/4 left-1/2 transform -translate-x-1/2" >
         <div class="border-2 h-[840px] w-[840px] fixed -top-1/4 left-1/2 transform -translate-x-1/2 rounded-full  bg-[#62F3FF] opacity-5 blur-3xl"></div>
     </div>
-
-    <div><img src="assets/logo.svg" alt="" class="absolute top-10 left-1/2 transform -translate-x-1/2 w-40"></div>
+    <!-- logo with name -->
+    <div><img src="assets/logo.svg" alt="" class="absolute top-10 left-1/2 transform -translate-x-1/2 w-40" id="logo"></div>
     
 
-    <form action="" method="post" class="w-1/3 flex flex-col gap-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  border border-[#38373E] rounded-2xl p-10 backdrop-blur-lg">
+    <form id="form" method="post" class="w-1/3 flex flex-col gap-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  border border-[#38373E] rounded-2xl p-10 backdrop-blur-lg">
         <!-- logo -->
         <div>
             <p class="text-4xl font-semibold mb-2">Log in</p>
@@ -105,15 +105,45 @@
             </div>
 
            
-        <div class="w-full flex justify-betweem">
-            <div class="w-4/5">
-                <a href="recovery.php" class="hover:underline text-[#999999]">Forgot password?</a>
+        <div class="w-full flex justify-betweem" id="form-btns">
+            <div class="w-4/5" id="forgot-password">
+                <a href="recovery.php"  class="hover:underline text-[#999999]">Forgot password?</a>
             </div>
              
             <div class="w-1/5 z-10">
-                <input type="submit" value="Log in" name="login" class="w-full bg-[#62F3FF]  py-3 rounded-full text-black font-semibold text-lg hover:cursor-pointer" >
+                <input id="login-btn" type="submit" value="Log in" name="login" class="w-full bg-[#62F3FF]  py-3 rounded-full text-black font-semibold text-lg hover:cursor-pointer" >
             </div>
         </div>
     </form>
 </body>
+
+<style>
+     @media only screen and (max-width: 430px) {
+        #logo{
+            width: 30%;
+        }
+     
+        #form{
+            width: 100%;
+            border: none;
+        }
+        #form-btns{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        #login-btn{
+            width: fit-content;
+            font-size: 15px;
+            padding-block: 5px;
+            padding-inline: 20px;
+        }
+
+        #forgot-password{
+            width: fit-content;
+            font-size: 15px;
+        }
+    }
+</style>
 </html>

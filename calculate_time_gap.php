@@ -27,8 +27,12 @@
                 // Add the current interval's seconds to the total
                 $total_seconds += $interval->h * 3600 + $interval->i * 60 + $interval->s;
                 
-                // push to array every time entries
-                array_push($time_entries, $interval->format('%H:%I:%S'));
+                  // Store date and time stopped in the array
+                $time_entries[] = [
+                    'date' => $row['date'],
+                    'time_stopped' => $interval->format('%H:%I:%S')
+                ];
+               
         }
 
         $query_chk_regular_hour = "SELECT regular_hour, over_time FROM daily_session WHERE employee_id = $employee_id";

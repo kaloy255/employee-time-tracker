@@ -1,5 +1,6 @@
 <?php 
     require "recovery-code.php"; 
+    
 ?>
 
 
@@ -19,28 +20,54 @@
 <body  class="h-screen bg-gradient-to-bl from-[#29282F] to-[#09080F] relative overflow-hidden text-white urbanist flex justify-center items-center">
 
     <div >
-        <img src="assets/r-logo.svg" alt="" class="fixed right-[38rem] top-[12rem]  w-[15%]">
-        <div class="border-2 h-[18rem] w-[15%] fixed right-[38rem] top-[12rem]  rounded-full  bg-[#62F3FF] opacity-15 blur-3xl"></div>
+        <img src="assets/r-logo.svg" alt="" class="fixed top-[12rem] left-1/2  transform -translate-x-1/2 translate-x-20 w-[15%]" id="bg-logo">
+        <div class="border-2 h-[18rem] fixed top-[12rem] left-1/2  transform -translate-x-1/2 translate-x-20 w-[15%]  rounded-full  bg-[#62F3FF] opacity-15 blur-3xl" id="bg-lightlogo"></div>
     </div>
 
 
-    <div class=" border border-[#38373E] rounded-2xl p-10 backdrop-blur-md rounded max-w-md w-1/2 ">
+    <div class=" border border-[#38373E] rounded-2xl p-10 backdrop-blur-md rounded max-w-md w-1/2 " id="form">
         <h2 class="text-2xl font-bold mb-6 text-center text-white">Account Recovery</h2> 
         <form id="recoveryForm" action="recovery-code.php" method="POST" class="space-y-6">
             <div>
                 <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email Address</label>
                 <input type="email" id="email" name="email" class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]" required>
-                <span class="text-sm text-red-500"><?=$_SESSION['recovery-message'];?></span>
+                <span class="text-sm text-red-500"> <?php echo isset($_SESSION['recovery-message']) ? $_SESSION['recovery-message'] : ''; ?></span>
             </div>
             <div class="flex justify-center">
                 <button 
                 type="submit" 
                 name="send_email_btn"
-                class=" bg-[#62F3FF]  text-black font-bold py-2 px-4 rounded ">
+                class=" bg-[#62F3FF]  text-black font-bold py-2 px-4 rounded"
+                id="send-btn"
+                >
                     Send Recovery Email
                 </button>
             </div>
         </form>
     </div>
 </body>
+<style>
+    @media only screen and (max-width: 430px) {
+        #form{
+            width: 100%;
+            border: none;
+        }
+
+        #form form input{
+            font-size: 12px;
+        }
+
+        #bg-logo{
+            width: 100%;
+        }
+        #bg-lightlogo{
+            width: 100%;
+        }
+        #send-btn{
+            font-size: 15px;
+        }
+
+
+    }
+</style>
 </html>

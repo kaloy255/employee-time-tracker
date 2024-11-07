@@ -29,7 +29,7 @@ if (isset($_POST['start'])) {
         echo "Error checking daily session: " . mysqli_error($conn);
     } elseif (mysqli_num_rows($result) == 0) {
         // Insert the time in entry
-        $query_start_daily_session = "INSERT INTO daily_session (employee_id, date) VALUES ($employee_id, '$date')";
+        $query_start_daily_session = "INSERT INTO daily_session (employee_id, date, regular_hour) VALUES ($employee_id, '$date', DEFAULT)";
         
         if (mysqli_query($conn, $query_start_daily_session)) {
             // Successfully inserted
@@ -63,112 +63,99 @@ if (isset($_POST['stop'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TimeisBlue</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="fonts.CSS">
     <link rel="icon" href="assets/fav-icon.svg" type="image/x-icon">
-    <style>
-        #timer {
-            font-size: 20px;
-            margin-top: 20px;
-        }
-    </style>
+
 </head>
-<body>
+<body class=" h-screen bg-gradient-to-br from-[#29282F] to-[#09080F] text-white urbanist flex flex-col ">
 
-   
-    <a href="logout.php"> logout</a>
-    <div class="timer" id="timer">00:00:00</div>
+<nav class=" flex justify-between px-20 py-3 border-b border-[#38373E]">
+   <!-- logo  -->
+    <img src="assets/logo.svg" alt="" class="w-32">
+    <div class="flex gap-5">
+        <!-- notification icon -->
+        <img src="assets/notif-icon.svg" alt="">
 
-    <form id="timeInForm" action="" method="POST">
-        <input type="submit" id="timeInButton" value="Clock In" name="start">
-    </form>
+        <div class="relative inline-block text-left">
+            <!-- Profile Button -->
+            <div onclick="toggleDropdown()" class="inline-flex w-full justify-center rounded-md bg-[#29282F] px-4 py-3 text-xs font-medium  shadow-sm hover:cursor-pointer  hover:bg-[#33323C]">
+                <div class="flex items-center gap-2">
+                    <img src="assets/default-prof.jpg" alt="" class="w-8 h-8 rounded-full">
+                    <div>
+                        <p><?=$_SESSION['fullname']?></p>
+                        <p class="text-[#999999]"><?=strtok($_SESSION['email'], "@")?></p>
+                    </div>
+                </div>
+                <div class="self-center ml-2 rounded-full hover:bg-[#999999]">
+                    <img src="assets/prof-option.svg" alt="">
+                </div>
+            </div>
 
-    <form id="timeOutForm" action="" method="POST" style="display: none;">
-        <input type="submit" id="timeOutButton" value="Clock Out" name="stop">
-    </form>
+            <!-- Dropdown Menu -->
+            <div id="dropdownMenu" class="hidden absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-[#29282F] shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                    <a href="" class="block px-4 py-2 text-sm hover:bg-[#33323C]" role="menuitem">Settings</a>
+                    <a href="logout.php" class="block px-4 py-2 text-sm hover:bg-[#33323C]" role="menuitem">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
 
-    <div>
-        <h1>Total Hours Worked</h1>
+<main class="self-center w-full flex justify-around flex-col items-center h-full">
+    <div id="border-timer" class="flex flex-col items-center gap-5 border border-[#38373E] rounded-lg w-1/3 py-10">
+        <!-- digital timer -->
+        <div class="timer text-8xl" id="timer">00:00:00</div>
+
+        <div>
+            <!-- start button -->
+            <form id="timeInForm" action="" method="POST">
+               
+                <button type="submit" id="timeInButton" name="start"  class="bg-gradient-to-r from-[#24D9E8] to-[#9C0777] rounded-full py-3 px-10 text-xl flex items-center gap-2"><img src="assets/start-icon.svg" alt=""> <span>START</span></button>
+                
+            </form>
+            <!-- stop button -->
+            <form id="timeOutForm" action="" method="POST" style="display: none;" >
+                    <button type="submit" id="timeOutButton"  name="stop" class="bg-[#29282F] rounded-full py-3 px-10 text-xl flex items-center gap-2"> <img src="assets/stop-icon.svg" alt=""> <span>STOP</span></button>
+            </form>
+        </div>
     </div>
 
-    <?php
-    foreach($time_entries as  $time){
-        echo "Time Stopped at:  ".$time."<br>";
-    }
-    ?>
-<!-- 
-    need to use loopings to get the past dily session of employee -->
-    <div>
-        <p><?=$readableDate;?></p>
-        <p>Total time consumed: <?=$hours?>Hours <?=$minutes?>minutes <?=$seconds;?>seconds</p>
-        <p>Overtime: <?=$ot_hours?>Hours <?=$ot_minutes?>minutes <?=$ot_seconds;?>seconds</p>
+    <div class="w-1/2">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-2xl">Activity Log</p>
+            <p class="px-5 py-2 bg-[#29282F] rounded-lg text-sm">Total Hours Consumed: <span><?php echo $hours,"H " . $minutes."mins"?></span></p>
+        </div>
+
+        <div class="flex justify-center flex-col gap-5">
+            <div class=" h-[225px] overflow-hidden flex flex-col gap-5">
+                <?php foreach (array_reverse($time_entries) as $entries): ?>
+                    <div class="w-full border border-[#38373E] px-5 py-2 rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <img src="assets/default-prof.jpg" alt="" class="w-8 w-8 rounded-full">
+                                <div>
+                                    <p class="text-sm"><?=$_SESSION['fullname']?></p>
+                                    <p class="text-sm text-[#999999]"><?=strtok($_SESSION['email'], "@")?></p>
+                                </div>
+                            </div>
+                            <div>
+                                <p><?=$entries['time_stopped']?></p>
+                                <p class="text-xs text-[#999999]">Stopped</p>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach;?>
+            </div>
+            <a href="history.php" class="py-2 px-5 bg-[#62F3FF] rounded-full text-black w-1/5 text-center self-center font-semibold">Review Past Entries</a>
+        </div>
     </div>
+
+</main>
 </body>
-
-
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
-
-
-<script>
-    // Timer variables
-    let timer;
-    let startTime;
-    
-    // Get timer display element
-    const timerDisplay = document.getElementById('timer');
-
-    // Format time (hh:mm:ss)
-    function formatTime(seconds) {
-        let hrs = Math.floor(seconds / 3600);
-        let mins = Math.floor((seconds % 3600) / 60);
-        let secs = Math.floor(seconds % 60);
-        return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    // Start the timer when employee clicks "Clock In"
-    document.getElementById('timeInForm').addEventListener('submit', function(event) {
-        event.preventDefault();  // Prevent form from submitting immediately
-        startTime = Date.now();
-
-        // Start the timer
-        timer = setInterval(function() {
-            let elapsed = Math.floor((Date.now() - startTime) / 1000);
-            timerDisplay.textContent = formatTime(elapsed);
-        }, 1000);
-
-        // Hide Clock In button and show Clock Out button
-        document.getElementById('timeInButton').style.display = 'none';
-        document.getElementById('timeOutForm').style.display = 'block';
-
-        // Optionally send the form data to the server for "Clock In"
-        fetch('', { method: 'POST', body: new URLSearchParams({ 'start': '1' }) })
-            .then(response => response.text())
-            .then(data => console.log(data))
-            .catch(error => console.error('Error:', error));
-    });
-
-    // Stop the timer when employee clicks "Clock Out"
-    document.getElementById('timeOutForm').addEventListener('submit', function(event) {
-        event.preventDefault();  // Prevent form from submitting immediately
-
-        // Stop the timer
-        clearInterval(timer);
-
-        // Optionally send the form data to the server for "Clock Out"
-        fetch('', { method: 'POST', body: new URLSearchParams({ 'stop': '1' }) })
-            .then(response => response.text())
-            .then(data => console.log(data))
-            .catch(error => console.error('Error:', error));
-
-        // Reset UI
-        document.getElementById('timeOutForm').style.display = 'none';
-        document.getElementById('timeInButton').style.display = 'block';
-        timerDisplay.textContent = "00:00:00";
-    });
-
-</script>
-
-
+<script src="script.js"></script>
 </html>
