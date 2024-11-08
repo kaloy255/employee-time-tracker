@@ -86,6 +86,7 @@
                 }else{
                     $form_erros = 'Registeration Failed';
                 }
+                header("Location: verify-email.php");
 
             }
     }

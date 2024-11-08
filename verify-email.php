@@ -5,6 +5,7 @@
     date_default_timezone_set('Asia/Manila');
 
     $code_error = "";
+    // submit verify code
     if(isset($_POST['submit'])){
         $box_1 = $_POST['box-1'];
         $box_2 = $_POST['box-2'];
@@ -32,6 +33,7 @@
                     // change
                     // $_SESSION['fullname'] = $row['fullname'];
                     session_destroy();
+                    echo "<script>alert('Successfull Verify');</script>";
                     header("Location: login.php");
                 }else{
                     $code_error =  "Wrong code or expired";
@@ -46,27 +48,56 @@
 
     }
     
-    if(isset($_POST['resend-code'])){
-        $user_id = $_SESSION['id'];
-        $fullname = $_SESSION['fullname'];
-        $email = $_SESSION['email'];
+
+    // Set cooldown period in seconds (3 minutes)
+    $cooldown_period = 180;
+    $remaining_time = 0;
+
+    // Check if the resend code button is clicked
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['resend-code'])) {
+         
+        $user_id = isset($_SESSION['id']) ? $_SESSION['id'] : '';
+        $fullname = isset($_SESSION['fullname']) ? $_SESSION['fullname'] : '';
+        $email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
         $expiration = date("Y-m-d H:i:s", strtotime("+10 minutes"));
 
-        sendmail_reset_password($email, $fullname, $verificationCode);
-        $hash_code = md5($verificationCode);
+        $current_time = time();
+        $last_resend_time = $_SESSION['last_resend_time'] ?? 0;
 
-        $update_code = "UPDATE employee SET verify_token = '$hash_code', expiration_token = '$expiration' WHERE id = $user_id";
-        $result = mysqli_query($conn, $update_code);
-
-        if($result){
-            echo "<script>alert('Verification code has been resent successfully. Please check your email.');</script>";
-        }else{
-            echo "<script>alert('Failed to resend verification code. Please try again later.');</script>";
+        if($user_id == "" || $fullname == "" || $email == ""  ){
+            $code_error = "Please register first or you already registered ";
         }
+        // Check if the cooldown period has elapsed
+        elseif ($current_time - $last_resend_time >= $cooldown_period) {
+            // Update last resend time in the session
+            $_SESSION['last_resend_time'] = $current_time;
+
+            // Simulate resend logic here (replace with actual resend function)
+            sendmail_verify($email, $fullname, $verificationCode);
+            $hash_code = md5($verificationCode);
+
+            $update_code = "UPDATE employee SET verify_token = '$hash_code', expiration_token = '$expiration' WHERE id = $user_id";
+            $result = mysqli_query($conn, $update_code);
+
+            if($result){
+                echo "<script>alert('Verification code has been resent successfully. Please check your email.');</script>";
+            }else{
+                echo "<script>alert('Failed to resend verification code. Please try again later.');</script>";
+            }
       
-       
-        
+        } else {
+            // Calculate remaining time for cooldown
+            $remaining_time = $cooldown_period - ($current_time - $last_resend_time);
+        }
+    } else {
+        // If page is loaded without a POST request, calculate remaining time based on last resend time
+        $current_time = time();
+        $last_resend_time = $_SESSION['last_resend_time'] ?? 0;
+        if ($current_time - $last_resend_time < $cooldown_period) {
+            $remaining_time = $cooldown_period - ($current_time - $last_resend_time);
+        }
     }
+
     
 ?>
 
@@ -128,15 +159,48 @@
             </div>
 
             <button class="verifyButton bg-[#62F3FF] px-4 py-2 rounded-lg hover:bg-[#3DBEC9] font-semibold transition duration-200 text-black" type="submit" name="submit">Verify</button>
-        
         </form>
-        <form action="" method="post">
+      
+        <form method="POST" action="">
             <p class="resendNote tracking-wider text-sm">Didn't receive the code? 
-                <button class="resendBtn text-[#62F3FF]  hover:underline focus:outline-none" type="submit" name="resend-code">Resend Code</button>
+            <button type="submit" name="resend-code" id="resendButton" class="resendBtn text-[#62F3FF]  hover:underline focus:outline-none">Resend Verification Code</button>
             </p>
+            <p id="timerDisplay" style="color: red;"></p> <!-- Timer display area -->
         </form>
 
     </div>
 
 </body>
+
+
+<script>
+    // JavaScript Countdown Timer
+    let remainingTime = <?php echo $remaining_time; ?>; // Get remaining time from PHP
+
+    function updateTimer() {
+        const button = document.getElementById('resendButton');
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        if (remainingTime > 0) {
+            button.disabled = true;
+            button.innerText = `Resend Verification Code (${remainingTime} seconds)`;
+            timerDisplay.innerText = `You can resend the code in ${remainingTime} seconds.`;
+            remainingTime--;
+
+            // Call updateTimer every second
+            setTimeout(updateTimer, 1000);
+        } else {
+            button.disabled = false;
+            button.innerText = "Resend Verification Code";
+            timerDisplay.innerText = ""; // Clear timer message
+        }
+    }
+
+    // Start the countdown if there is remaining time
+    window.onload = function() {
+        if (remainingTime > 0) {
+            updateTimer();
+        }
+    };
+    </script>
 </html>

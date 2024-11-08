@@ -45,24 +45,66 @@
  
      }
  
-     if(isset($_POST['resend-code'])){
+    //  if(isset($_POST['resend-code'])){
+    //     $fullname = $_SESSION['fullname'];
+    //     $email = $_SESSION['recovery-email'];
+    //     $hash_code = md5($reset_code);
+
+    //     sendmail_reset_password($email, $fullname, $reset_code);
+
+    //     $update_code = "UPDATE employee SET reset_code = '$hash_code' WHERE email = '$email'";
+    //     $result = mysqli_query($conn, $update_code);
+
+    //     if($result){
+    //         echo "<script>alert('Verification code has been resent successfully. Please check your email.');</script>";
+    //     }else{
+    //         echo "<script>alert('Failed to resend verification code. Please try again later.');</script>";
+    //     }
+    // }
+
+    // Set cooldown period in seconds (15 seconds)
+    $cooldown_period = 180;
+    $remaining_time = 0;
+
+    // Check if the resend code button is clicked
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['resend-code'])) {
         $fullname = $_SESSION['fullname'];
         $email = $_SESSION['recovery-email'];
         $hash_code = md5($reset_code);
 
-        sendmail_reset_password($email, $fullname, $reset_code);
+        $current_time = time();
+        $last_resend_time = $_SESSION['last_resend_time'] ?? 0;
 
-        $update_code = "UPDATE employee SET reset_code = '$hash_code' WHERE email = '$email'";
-        $result = mysqli_query($conn, $update_code);
+        // Check if the cooldown period has elapsed
+        if ($current_time - $last_resend_time >= $cooldown_period) {
+            // Update last resend time in the session
+            $_SESSION['last_resend_time'] = $current_time;
 
-        if($result){
-            echo "<script>alert('Verification code has been resent successfully. Please check your email.');</script>";
-        }else{
-            echo "<script>alert('Failed to resend verification code. Please try again later.');</script>";
+            // Simulate resend logic here (replace with actual resend function)
+            sendmail_reset_password($email, $fullname, $reset_code);
+
+            $update_code = "UPDATE employee SET reset_code = '$hash_code' WHERE email = '$email'";
+            $result = mysqli_query($conn, $update_code);
+
+            if($result){
+                echo "<script>alert('Verification code has been resent successfully. Please check your email.');</script>";
+            }else{
+                echo "<script>alert('Failed to resend verification code. Please try again later.');</script>";
+            }
+        } else {
+            // Calculate remaining time for cooldown
+            $remaining_time = $cooldown_period - ($current_time - $last_resend_time);
+        }
+    } else {
+        // If page is loaded without a POST request, calculate remaining time based on last resend time
+        $current_time = time();
+        $last_resend_time = $_SESSION['last_resend_time'] ?? 0;
+        if ($current_time - $last_resend_time < $cooldown_period) {
+            $remaining_time = $cooldown_period - ($current_time - $last_resend_time);
         }
     }
 
-   
+    
 ?>
 
 
@@ -115,11 +157,42 @@
             
             
         </form>
-        <form action="" method="post">
+        <form method="POST" action="">
             <p class="resendNote tracking-wider text-sm">Didn't receive the code? 
-                <button class="resendBtn text-[#62F3FF] hover:underline focus:outline-none" type="submit" name="resend-code">Resend Code</button>
+            <button type="submit" name="resend-code" id="resendButton" class="resendBtn text-[#62F3FF]  hover:underline focus:outline-none">Resend Verification Code</button>
             </p>
+            <p id="timerDisplay" style="color: red;"></p> <!-- Timer display area -->
         </form>
     </div>
 </body>
+<script>
+    // JavaScript Countdown Timer
+    let remainingTime = <?php echo $remaining_time; ?>; // Get remaining time from PHP
+
+    function updateTimer() {
+        const button = document.getElementById('resendButton');
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        if (remainingTime > 0) {
+            button.disabled = true;
+            button.innerText = `Resend Verification Code (${remainingTime} seconds)`;
+            timerDisplay.innerText = `You can resend the code in ${remainingTime} seconds.`;
+            remainingTime--;
+
+            // Call updateTimer every second
+            setTimeout(updateTimer, 1000);
+        } else {
+            button.disabled = false;
+            button.innerText = "Resend Verification Code";
+            timerDisplay.innerText = ""; // Clear timer message
+        }
+    }
+
+    // Start the countdown if there is remaining time
+    window.onload = function() {
+        if (remainingTime > 0) {
+            updateTimer();
+        }
+    };
+    </script>
 </html>
