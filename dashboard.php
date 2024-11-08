@@ -128,7 +128,7 @@ if (isset($_POST['stop'])) {
     <div class="w-1/2">
         <div class="flex items-center justify-between mb-2">
             <p class="text-2xl">Activity Log</p>
-            <p class="px-5 py-2 bg-[#29282F] rounded-lg text-sm">Total Hours Consumed: <span><?php foreach (array_reverse($sessions) as $session): echo $session['time']['hours'] . " Hrs ". $session['time']['minutes']." Mins"; endforeach;?> </span></p>
+            <p class="px-5 py-2 bg-[#29282F] rounded-lg text-sm">Total Hours Consumed: <span><?php echo $hours,"H " . $minutes."mins"?></span></p>
         </div>
 
         <div class="flex justify-center flex-col gap-5">
