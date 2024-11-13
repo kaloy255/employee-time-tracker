@@ -6,7 +6,7 @@
   }
 
   /* Unset user data */
-  unset($_SESSION['email']);
+  session_destroy();
   
   $_SESSION['status'] = "invalid";
 

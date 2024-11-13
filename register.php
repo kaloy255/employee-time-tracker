@@ -1,99 +1,90 @@
 <?php
-    session_start();
-    require "database.php";
-    require "countries.php";
-    require "sendmail.php";
-   
+session_start();
+require "database.php";
+require "countries.php";
+require "sendmail.php";
 
+// Set to PH time
+date_default_timezone_set('Asia/Manila');
 
+// Error messages
+$pass_error = "";
+$email_error = "";
+$form_error = "";
+$country_error = "";
+$age_error = "";
 
-    // set to ph time
-    date_default_timezone_set('Asia/Manila');
-  
-    //   error message
-    $pass_error = "";
-    $email_error = "";
-    $form_error = "";
-    $country_error = "";
+// Initialize input values
+$first_name = $last_name = $middle_name = $email = $age = $street_address = $suburb = $city = $state = $postcode = $country = "";
 
-    if(isset($_POST['create'])){
-        $fullname = trim($_POST['first_name']). " ". trim($_POST['last_name']);
-        $email = trim($_POST['email']);
-        $age = (int)$_POST['age'];
-        $password = trim(md5($_POST['password']));
-        $comfirm_password = trim(md5($_POST['confirm_password']));
-        $street_address = $_POST['street_address'];
-        $suburb = trim($_POST['suburb']);
-        $city = trim($_POST['city']);
-        $state = trim($_POST['state']);
-        $postcode = trim($_POST['postcode']);
-        $country = trim($_POST['country']);
-        $role = "employee";
-        
-        
-        
-        // set the expiration the on token
-        $expiration = date("Y-m-d H:i:s", strtotime("+10 minutes"));
-       
-        // resign the verify token to hash alphnumeric
-        $hash_verify_code = md5($verificationCode);
- 
+if(isset($_POST['create'])){
+    $first_name = trim($_POST['first_name']);
+    $last_name = trim($_POST['last_name']);
+    $middle_name = trim($_POST['middle_name']);
+    $fullname = $first_name . " " . $last_name . " " . $middle_name;
+    $email = trim($_POST['email']);
+    $age = (int)$_POST['age'];
+    $password = trim(md5($_POST['password']));
+    $confirm_password = trim(md5($_POST['confirm_password']));
+    $street_address = $_POST['street_address'];
+    $suburb = trim($_POST['suburb']);
+    $city = trim($_POST['city']);
+    $state = trim($_POST['state']);
+    $postcode = trim($_POST['postcode']);
+    $country = trim($_POST['country']);
+    $role = "employee";
 
-        //    check the password if contain alpha numeric and match
-            $chk_password = $_POST['password'];
-            $chk_cpassword = $_POST['confirm_password'];
-            if (!preg_match('/[A-Za-z]/', $chk_password) || !preg_match('/\d/', $chk_password)) {
-                $pass_error = "Password must contain at least one letter and one number.";
-            }elseif($chk_password !== $chk_cpassword){
-                $pass_error = "Passwords do not match.";   
-            }
+    // Set the expiration for token
+    $expiration = date("Y-m-d H:i:s", strtotime("+10 minutes"));
+    $hash_verify_code = md5($verificationCode);
 
-            // check if employee not choosing a country
-            if($country === "null"){
-                $country_error = "Please Choose Your Country";
-
-            }
-
-            // check if email is already exists
-            $chk_email = "SELECT email From employee WHERE email = '$email'";
-            $chk_email_query = mysqli_query($conn, $chk_email);
-            
-            // check is have errors
-            if(mysqli_num_rows($chk_email_query) > 0){
-                $email_error = 'Email already Exists';
-
-            }elseif(!empty($pass_error) || !empty($email_error) || empty($country)){
-                
-            }else{
-                // insert the employee data
-                $query_insert = "INSERT INTO employee (fullname, email, age, password, street_address, suburb, city, state, postcode, country, verify_token, expiration_token, role) VALUES('$fullname', '$email', $age, '$password', '$street_address', '$suburb','$city', '$state', '$postcode', '$country', '$hash_verify_code','$expiration', '$role')";
-                
-                $query_run = mysqli_query($conn, $query_insert);
-
-                if($query_run){
-                    // get the id of register employee
-                    $last_id = mysqli_insert_id($conn);
-
-                    // send the generated code to email of employee
-                    sendmail_verify($email, $fullname, $verificationCode);
-
-                    $_SESSION['id'] = $last_id;
-                    $_SESSION['email'] = $email;
-                    $_SESSION['fullname'] = $fullname;
-                    $_SESSION['verify_code'] = $hash_verify_code;
-                    header("Location: verify-email.php");
-
-                }else{
-                    $form_erros = 'Registeration Failed';
-                }
-                header("Location: verify-email.php");
-
-            }
+    // Check if the password contains alphanumeric and matches
+    $chk_password = $_POST['password'];
+    $chk_cpassword = $_POST['confirm_password'];
+    if (!preg_match('/[A-Za-z]/', $chk_password) || !preg_match('/\d/', $chk_password)) {
+        $pass_error = "Password must contain at least one letter and one number.";
+    } elseif ($chk_password !== $chk_cpassword) {
+        $pass_error = "Passwords do not match.";
     }
 
+    // Check if employee hasn't chosen a country
+    if($country === "null"){
+        $country_error = "Please Choose Your Country";
+    }
 
+    // Check if age is valid (18-85)
+    if($age < 18 || $age > 85){
+        $age_error = "Age must be between 18 and 85 years.";
+    }
+
+    $chk_email = "SELECT email FROM employee WHERE email = '$email'";
+    $chk_email_query = mysqli_query($conn, $chk_email);
+
+    // Check if email already exists
+    if(mysqli_num_rows($chk_email_query) > 0){
+        $email_error = 'Email already Exists';
+    } elseif (empty($pass_error) && empty($email_error) && empty($country_error) && empty($age_error)) {
+        // Insert employee data
+        $query_insert = "INSERT INTO employee (fullname, email, age, password, street_address, suburb, city, state, postcode, country, verify_token, expiration_token, role) 
+                         VALUES('$fullname', '$email', $age, '$password', '$street_address', '$suburb','$city', '$state', '$postcode', '$country', '$hash_verify_code','$expiration', '$role')";
+
+        $query_run = mysqli_query($conn, $query_insert);
+
+        if($query_run){
+            $last_id = mysqli_insert_id($conn);
+            sendmail_verify($email, $fullname, $verificationCode);
+            $_SESSION['id'] = $last_id;
+            $_SESSION['email'] = $email;
+            $_SESSION['fullname'] = $fullname;
+            $_SESSION['verify_code'] = $hash_verify_code;
+            header("Location: verify-email.php");
+        } else {
+            $form_error = 'Registration Failed';
+        }
+        header("Location: verify-email.php");
+    }
+}
 ?>
-
 
 
 <!DOCTYPE html>
@@ -109,6 +100,7 @@
     <link rel="stylesheet" href="fonts.CSS">
     <link rel="icon" href="assets/fav-icon.svg" type="image/x-icon">
 </head>
+
 <body class="h-screen bg-gradient-to-bl from-[#29282F] to-[#09080F] relative overflow-hidden text-white urbanist">
      <!-- logo -->
     <div>
@@ -128,24 +120,45 @@
         <div class="flex flex-col gap-8">
             <!-- fullname -->
             <div class="flex gap-2">
-                <div class="relative font-sans w-1/2">
+                <div class="relative font-sans w-full">
                     <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
+                        value="<?= htmlspecialchars($first_name); ?>"
                         name="first_name"
                         type="text"
+                        id="first-name"
                         required>
                     <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                         First name
                     </label>
                 </div>
 
-                <div class="relative font-sans w-1/2">
+                <div class="relative font-sans  w-full">
                     <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
+                        value="<?= htmlspecialchars($last_name); ?>"
                         name="last_name"
                         type="text"
+                        id="last-name"
                         required>
                     <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                         Last name
                     </label>
+                </div>
+
+                <div class="relative font-sans w-full">
+                    <input 
+                        class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF] text-white placeholder-transparent"
+                        value="<?= htmlspecialchars($middle_name); ?>"
+                        name="middle_name"
+                        type="text"
+                        id="middle-name"
+                        placeholder=" ">
+                    <label 
+                        class="absolute left-1 text-[#757575] pointer-events-none transform -translate-y-6 transition duration-150 
+                            peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:-left-1 
+                            peer-placeholder-shown:translate-y-2 peer-placeholder-shown:scale-90 
+                            peer-placeholder-shown:left-1 peer-focus:text-[#62F3FF] peer-valid:scale-90">
+                            Middle name (Optional)
+                        </label>
                 </div>
             </div>
 
@@ -154,8 +167,10 @@
                 <div class="flex gap-2">
                     <div class="relative font-sans w-1/2">
                         <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
+                            value="<?= htmlspecialchars($email); ?>"
                             name="email"
                             type="email"
+                            id="email"
                             required>
                         <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                             Email
@@ -164,15 +179,20 @@
 
                     <div class="relative font-sans w-1/2">
                         <input class="no-spinner w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
+                            value="<?= htmlspecialchars($age); ?>"
                             name="age"
                             type="number"
+                            id="age"
                             required>
                         <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                             Age
                         </label>
                     </div>
                 </div>
-                <span class="text-red-500"><?= $email_error;?></span>
+                <div class="flex items-center justify-between">
+                    <span class="text-red-500"><?= $email_error;?></span>
+                    <span class="text-red-500"><?= $age_error;?></span>
+                </div>
             </div>
 
             <!-- Password -->
@@ -184,6 +204,7 @@
                             type="password"
                             minlength="8"
                             maxlength="32"
+                            id="password"
                             required>
                         <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                             Password
@@ -196,6 +217,7 @@
                             type="password"
                             minlength="8"
                             maxlength="32"
+                            id="confirm-password"
                             required>
                         <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                             Confirm password
@@ -209,8 +231,10 @@
             <div class="flex gap-2">
                 <div class="relative font-sans w-1/2">
                     <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
+                        value="<?= htmlspecialchars($street_address); ?>"
                         name="street_address"
                         type="text"
+                        id="street-address"
                         required>
                     <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                         Street Address
@@ -219,8 +243,10 @@
 
                 <div class="relative font-sans w-1/2">
                     <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
+                        value="<?= htmlspecialchars($suburb); ?>"
                         name="suburb"
                         type="text"
+                        id="suburb"
                         required>
                     <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                         Suburb
@@ -231,8 +257,10 @@
             <div class="flex gap-2">
                 <div class="relative font-sans w-1/4">
                     <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
+                        value="<?= htmlspecialchars($city); ?>"
                         name="city"
                         type="text"
+                        id="city"
                         required>
                     <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                         City
@@ -241,8 +269,10 @@
 
                 <div class="relative font-sans w-1/4">
                     <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
+                        value="<?= htmlspecialchars($state); ?>"
                         name="state"
                         type="text"
+                        id="state"
                         required>
                     <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                         State
@@ -251,18 +281,20 @@
 
                 <div class="relative font-sans w-1/4">
                     <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2  transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
+                        value="<?= htmlspecialchars($postcode); ?>"
                         name="postcode"
                         type="text"
+                        id="postcode"
                         required>
                     <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                         Postcode
                     </label>
                 </div>
                 <div class="w-1/4 ">
-                    <select  class="w-full p-[9px] bg-transparent  border border-[#38373E] rounded-xl  text-[#757575] relative" name="country" required>
+                    <select  class="w-full p-[9px] bg-transparent  border border-[#38373E] rounded-xl  text-[#757575] relative" name="country" id="country"  value="null" <?= $country === "null" ? "selected" : ""; ?> required>
                         <option value="null"  class="bg-[#29282F] text-white">Select your country</option>
-                        <?php foreach ($countries as $country): ?>
-                            <option value="<?php echo htmlspecialchars($country); ?>" class="bg-[#29282F] text-white"><?php echo htmlspecialchars($country); ?></option>
+                        <?php foreach ($countries as $option): ?>
+                            <option value="<?= htmlspecialchars($option) ?>" <?= $country == $option ? "selected" : "" ?> class="bg-[#29282F] text-white"><?php echo htmlspecialchars($option); ?></option>
                         <?php endforeach; ?>
                                     
                     </select>
