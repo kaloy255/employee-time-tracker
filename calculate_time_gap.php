@@ -81,7 +81,7 @@
             
             $current_sessions[] = [
                 'date' => $row['date'],
-                'time_consumed' => $row['time_consumed']
+                'time_consumed' => $row['time_consumed']+$row['over_time']
             ];
         }
     } 

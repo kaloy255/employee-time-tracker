@@ -1,6 +1,25 @@
 <?php 
     require "recovery-code.php"; 
     
+    // Functions 
+    function pathTo($destination) {
+        echo "<script>window.location.href = '$destination.php'</script>";
+    }
+
+
+    // Check if 'status' key is set in the session, if not, set it to 'invalid'
+    if (!isset($_SESSION['status']) || $_SESSION['status'] == 'invalid'){
+        //Set Default Invalid 
+        $_SESSION['status'] = 'invalid';  
+        
+        
+    }
+
+    // check if status is valid and direct to home page
+    if ($_SESSION['status'] == 'valid') {
+        pathTo('dashboard');
+    }
+    
 ?>
 
 

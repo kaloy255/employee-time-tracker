@@ -53,7 +53,7 @@
             
             $sessions[] = [
                 'date' => $row['date'],
-                'time_consumed' => $row['time_consumed']
+                'time_consumed' => $row['time_consumed']+$row['over_time']
             ];
         }
     } 
@@ -141,7 +141,7 @@
                                     <p>
                                         <?= $entries['time_stopped']?>
                                     </p>
-                                    <p class="text-[#999999]">Stopped</p>
+                                    <p class="text-[#999999] text-xs">Stopped</p>
                                 </div>
                             </div>
                         <?php endif; ?>
