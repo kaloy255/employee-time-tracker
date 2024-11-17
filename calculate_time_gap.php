@@ -1,11 +1,10 @@
 <?php
-    require "database.php"; 
     require "session.php"; 
+    require "database.php"; 
     date_default_timezone_set('Asia/Manila');
 
 
     $current_date = date("Y-m-d");
-
     $employee_id = $_SESSION['id'];
     
     $current_overtime_hours= 0;

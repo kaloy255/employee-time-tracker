@@ -53,7 +53,7 @@
             
             $sessions[] = [
                 'date' => $row['date'],
-                'time_consumed' => $row['time_consumed']+$row['over_time']
+                'time_consumed' => ($row['time_consumed']+$row['over_time'])
             ];
         }
     } 

@@ -1,7 +1,6 @@
 <?php
 
 require "calculate_time_gap.php"; 
-
 // Start button
 if (isset($_POST['start'])) {
     // insert the value of timein in session
@@ -17,7 +16,7 @@ if (isset($_POST['stop'])) {
     $time_in = $_SESSION['time_in'];
     // ended time
     $time_out = date("Y-m-d H:i:s");
-    $employee_id = $_SESSION['id'];
+    $employee_id = (int)$_SESSION['id'];
 
     // insert the started and ended time in database
     $query_insert_entries = "INSERT INTO time_entries (employee_id,time_started, time_ended, date) VALUES ($employee_id,'$time_in', '$time_out', '$date')";
@@ -35,6 +34,8 @@ if (isset($_POST['stop'])) {
         echo "Error updating time_entries: " . mysqli_error($conn);
     }
 }
+
+   
 
 
 ?>
@@ -95,14 +96,12 @@ if (isset($_POST['stop'])) {
 
         <div>
             <!-- start button -->
-            <form id="timeInForm" action="" method="POST">
-               
+            <form id="timeInForm"  method="POST">
                 <button type="submit" id="timeInButton" name="start"  class="bg-gradient-to-r from-[#24D9E8] to-[#9C0777] rounded-full py-3 px-10 text-xl flex items-center gap-2"><img src="assets/start-icon.svg" alt=""> <span>START</span></button>
-                
             </form>
             <!-- stop button -->
-            <form id="timeOutForm" action="" method="POST" style="display: none;" >
-                    <button type="submit" id="timeOutButton" name="stop" class="bg-[#29282F] rounded-full py-3 px-10 text-xl flex items-center gap-2"> <img src="assets/stop-icon.svg" alt=""> <span>STOP</span></button>
+            <form id="timeOutForm"  method="POST" style="display: none;" >
+                <button type="submit" id="timeOutButton" name="stop" class="bg-[#29282F] rounded-full py-3 px-10 text-xl flex items-center gap-2"> <img src="assets/stop-icon.svg" alt=""> <span>STOP</span></button>
             </form>
         </div>
     </div>
@@ -115,7 +114,7 @@ if (isset($_POST['stop'])) {
                     <span class="text-white">
                         <?php 
                             foreach ($current_sessions as $session):
-                            echo gmdate("H:i:s", $session['time_consumed']);
+                                echo gmdate("H:i:s", $session['time_consumed']);
                             endforeach; 
                         ?>
                     </span>
