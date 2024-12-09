@@ -37,7 +37,13 @@
                 $_SESSION['id'] = $row['id'];
                 $_SESSION['fullname'] = $row['fullname'];
                 $_SESSION['email'] = $row['email'];
-                header("Location: dashboard.php");
+                $_SESSION['position'] = $row['position'];
+
+                if($row['role'] == "admin"){
+                    header("Location: user_employee.php");
+                }else{
+                    header("Location: dashboard.php");
+                }
             }
         }else{
             $error_message = "Wrong email or password";

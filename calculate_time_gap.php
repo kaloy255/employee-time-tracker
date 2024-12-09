@@ -5,7 +5,7 @@
 
 
     $current_date = date("Y-m-d");
-    $employee_id = $_SESSION['id'];
+    $employee_id = (int)$_SESSION['id'];
     
     $current_overtime_hours= 0;
     $current_total_seconds = 0; 

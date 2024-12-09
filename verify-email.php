@@ -33,7 +33,7 @@
                     // change
                     // $_SESSION['fullname'] = $row['fullname'];
                     session_destroy();
-                    echo "<script>alert('Successfull Verify');</script>";
+                    echo "<script>alert('Successfull Verify!!');</script>";
                     header("Location: login.php");
                 }else{
                     $code_error =  "Wrong code or expired";

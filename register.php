@@ -31,6 +31,7 @@ $email_error = "";
 $form_error = "";
 $country_error = "";
 $age_error = "";
+$position_error = "";
 
 // Initialize input values
 $first_name = $last_name = $middle_name = $email = $age = $street_address = $suburb = $city = $state = $postcode = $country = "";
@@ -39,7 +40,7 @@ if(isset($_POST['create'])){
     $first_name = trim($_POST['first_name']);
     $last_name = trim($_POST['last_name']);
     $middle_name = trim($_POST['middle_name']);
-    $fullname = $first_name . " " . $last_name . " " . $middle_name;
+    $fullname = $first_name . " " . $middle_name . " " . $last_name;
     $email = trim($_POST['email']);
     $age = (int)$_POST['age'];
     $password = trim(md5($_POST['password']));
@@ -50,7 +51,9 @@ if(isset($_POST['create'])){
     $state = trim($_POST['state']);
     $postcode = trim($_POST['postcode']);
     $country = trim($_POST['country']);
+    $position = trim($_POST['position']);
     $role = "employee";
+
 
     // Set the expiration for token
     $expiration = date("Y-m-d H:i:s", strtotime("+10 minutes"));
@@ -70,6 +73,11 @@ if(isset($_POST['create'])){
         $country_error = "Please Choose Your Country";
     }
 
+    // Check if employee hasn't chosen a position
+    if($position === "null"){
+        $position_error = "Please Choose Your Position";
+    }
+
     // Check if age is valid (18-85)
     if($age < 18 || $age > 85){
         $age_error = "Age must be between 18 and 85 years.";
@@ -81,10 +89,10 @@ if(isset($_POST['create'])){
     // Check if email already exists
     if(mysqli_num_rows($chk_email_query) > 0){
         $email_error = 'Email already Exists';
-    } elseif (empty($pass_error) && empty($email_error) && empty($country_error) && empty($age_error)) {
+    } elseif (empty($pass_error) && empty($email_error) && empty($country_error) && empty($age_error) && empty($position_error)) {
         // Insert employee data
-        $query_insert = "INSERT INTO employee (fullname, email, age, password, street_address, suburb, city, state, postcode, country, verify_token, expiration_token, role) 
-                         VALUES('$fullname', '$email', $age, '$password', '$street_address', '$suburb','$city', '$state', '$postcode', '$country', '$hash_verify_code','$expiration', '$role')";
+        $query_insert = "INSERT INTO employee (fullname, email, age, password, street_address, suburb, city, state, postcode, country, verify_token, expiration_token, role, position) 
+                         VALUES('$fullname', '$email', $age, '$password', '$street_address', '$suburb','$city', '$state', '$postcode', '$country', '$hash_verify_code','$expiration', '$role', '$position')";
 
         $query_run = mysqli_query($conn, $query_insert);
 
@@ -184,15 +192,18 @@ if(isset($_POST['create'])){
             <div>
                 <div class="flex gap-2">
                     <div class="relative font-sans w-1/2">
-                        <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
-                            value="<?= htmlspecialchars($email); ?>"
-                            name="email"
-                            type="email"
-                            id="email"
-                            required>
-                        <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
-                            Email
-                        </label>
+                        <div>
+                            <input class="w-full peer border border-[#38373E] rounded-xl bg-transparent p-2 text-base transition duration-150 focus:outline-none focus:ring-0 focus:border-[#62F3FF]"
+                                value="<?= htmlspecialchars($email); ?>"
+                                name="email"
+                                type="email"
+                                id="email"
+                                required>
+                            <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
+                                Email
+                            </label>
+                        </div>
+                        <span class="text-red-500"><?= $email_error;?></span>
                     </div>
 
                     <div class="relative font-sans w-1/2">
@@ -205,11 +216,19 @@ if(isset($_POST['create'])){
                         <label class="absolute left-4 text-[#757575] pointer-events-none transform translate-y-2 transition duration-150 peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:px-1 peer-focus:left-1 peer-valid:-translate-y-6 peer-valid:scale-90 peer-valid:px-1 peer-valid:left-2 peer-focus:text-[#62F3FF]">
                             Age
                         </label>
+                        <span class="text-red-500"><?= $age_error;?></span>
                     </div>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-red-500"><?= $email_error;?></span>
-                    <span class="text-red-500"><?= $age_error;?></span>
+
+                    <div class="relative font-sans w-1/2">
+                        <select name="position" id="" class="w-full p-[9px] bg-transparent  border border-[#38373E] rounded-xl  text-[#757575] relative">
+                            <option value="null" class="bg-[#29282F] text-white">Choose your position</option>
+                            <option value="Developer" class="bg-[#29282F] text-white">Developer</option>
+                            <option value="Designer" class="bg-[#29282F] text-white">Designer</option>
+                        </select>
+                        <span class="text-red-500"><?= $position_error;?></span>
+                    </div>
+
+                    
                 </div>
             </div>
 

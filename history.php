@@ -87,7 +87,7 @@
                         <img src="assets/default-prof.jpg" alt="" class="w-8 h-8 rounded-full">
                         <div>
                             <p><?=$_SESSION['fullname']?></p>
-                            <p class="text-[#999999]"><?=strtok($_SESSION['email'], "@")?></p>
+                            <p class="text-[#999999]"><?=$_SESSION['position']?></p>
                         </div>
                     </div>
                     <div class="self-center ml-2 rounded-full hover:bg-[#999999]">
@@ -132,8 +132,8 @@
                                 <div class="flex items-center gap-2">
                                     <img src="assets/default-prof.jpg" alt="" class="w-8 h-8 rounded-md">
                                     <div class="text-sm leading-none">
-                                        <p><?=$_SESSION['fullname']?></p>
-                                        <p class="text-[#999999] text-xs"><?=$_SESSION['fullname']?></p>
+                                        <p><?=strtoupper($_SESSION['fullname'])?></p>
+                                        <p class="text-[#999999] text-xs"><?=$_SESSION['position']?></p>
                                     </div>
                                 </div>
 
