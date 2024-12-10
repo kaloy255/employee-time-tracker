@@ -17,8 +17,13 @@
     }
 
     // check if status is valid and direct to home page
-    if ($_SESSION['status'] == 'valid') {
+    if ($_SESSION['status'] == 'valid' && $_SESSION['role'] == "employee") {
         pathTo('dashboard');
+    }
+
+      // check if status is valid and direct to home page
+      if ($_SESSION['status'] == 'valid' && $_SESSION['role'] == "admin") {
+        pathTo('user_employee');
     }
     // error message
     $error_message = "";
@@ -38,6 +43,7 @@
                 $_SESSION['fullname'] = $row['fullname'];
                 $_SESSION['email'] = $row['email'];
                 $_SESSION['position'] = $row['position'];
+                $_SESSION['role'] = $row['role'];
 
                 if($row['role'] == "admin"){
                     header("Location: user_employee.php");

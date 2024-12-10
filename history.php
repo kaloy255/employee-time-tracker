@@ -87,7 +87,7 @@
                         <img src="assets/default-prof.jpg" alt="" class="w-8 h-8 rounded-full">
                         <div>
                             <p><?=$_SESSION['fullname']?></p>
-                            <p class="text-[#999999]"><?=$_SESSION['position']?></p>
+                            <p class="text-[#999999]"><?=ucwords($_SESSION['position'])?></p>
                         </div>
                     </div>
                     <div class="self-center ml-2 rounded-full hover:bg-[#999999]">
@@ -133,7 +133,7 @@
                                     <img src="assets/default-prof.jpg" alt="" class="w-8 h-8 rounded-md">
                                     <div class="text-sm leading-none">
                                         <p><?=strtoupper($_SESSION['fullname'])?></p>
-                                        <p class="text-[#999999] text-xs"><?=$_SESSION['position']?></p>
+                                        <p class="text-[#999999] text-xs"><?=ucwords($_SESSION['position'])?></p>
                                     </div>
                                 </div>
 

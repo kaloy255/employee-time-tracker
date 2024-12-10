@@ -1,87 +1,108 @@
-<?php
-session_start();
-
-// Set cooldown period in seconds (e.g., 300 seconds = 5 minutes)
-$cooldown_period = 180;
-$remaining_time = 0;
-
-// Check if the resend code button is clicked
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['resend_code'])) {
-    $current_time = time();
-    $last_resend_time = $_SESSION['last_resend_time'] ?? 0;
-
-    // Check if the cooldown period has elapsed
-    if ($current_time - $last_resend_time >= $cooldown_period) {
-        // Update last resend time in the session
-        $_SESSION['last_resend_time'] = $current_time;
-
-        // Simulate resend logic here (replace with actual resend function)
-        $resend_successful = resendVerificationCode(); // Replace with actual resend function
-
-        if ($resend_successful) {
-            echo "<script>alert('Verification code has been resent successfully. Please check your email.');</script>";
-        } else {
-            echo "<script>alert('Failed to resend verification code. Please try again later.');</script>";
-        }
-    } else {
-        // Calculate remaining time for cooldown
-        $remaining_time = $cooldown_period - ($current_time - $last_resend_time);
-    }
-} else {
-    // If page is loaded without a POST request, calculate remaining time based on last resend time
-    $current_time = time();
-    $last_resend_time = $_SESSION['last_resend_time'] ?? 0;
-    if ($current_time - $last_resend_time < $cooldown_period) {
-        $remaining_time = $cooldown_period - ($current_time - $last_resend_time);
-    }
-}
-
-// Placeholder function for actual resend logic
-function resendVerificationCode() {
-    return true; // Simulate success
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Resend Verification Code</title>
-    <script>
-    // JavaScript Countdown Timer
-    let remainingTime = <?php echo $remaining_time; ?>; // Get remaining time from PHP
-
-    function updateTimer() {
-        const button = document.getElementById('resendButton');
-        const timerDisplay = document.getElementById('timerDisplay');
-
-        if (remainingTime > 0) {
-            button.disabled = true;
-            button.innerText = `Resend Verification Code (${remainingTime} seconds)`;
-            timerDisplay.innerText = `You can resend the code in ${remainingTime} seconds.`;
-            remainingTime--;
-
-            // Call updateTimer every second
-            setTimeout(updateTimer, 1000);
-        } else {
-            button.disabled = false;
-            button.innerText = "Resend Verification Code";
-            timerDisplay.innerText = ""; // Clear timer message
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search and Sort Data</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
-    }
-
-    // Start the countdown if there is remaining time
-    window.onload = function() {
-        if (remainingTime > 0) {
-            updateTimer();
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
         }
-    };
-    </script>
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
 </head>
 <body>
-    <form method="POST" action="">
-        <button type="submit" name="resend_code" id="resendButton">Resend Verification Code</button>
-        <p id="timerDisplay" style="color: red;"></p> <!-- Timer display area -->
-    </form>
+    <h1>Live Search and Sorting by Employee Name</h1>
+
+    <!-- Search Bar -->
+    <label for="search">Search Employee Name:</label>
+    <input type="text" id="search" placeholder="Type to search..." onkeyup="fetchData()">
+
+    <!-- Sort Button -->
+    <button id="sort_button">
+        Sort by Employee Name <span id="sort_order">⬇️</span>
+    </button>
+
+    <!-- Results Table -->
+    <table id="results_table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Employee Name</th>
+                <th>Employee ID</th>
+                <th>Date</th>
+                <th>Time Consumed</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="5">No data to display.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        const searchInput = document.getElementById("search");
+        const sortButton = document.getElementById("sort_button");
+        const resultsTable = document.getElementById("results_table").getElementsByTagName("tbody")[0];
+        let sortOrder = "asc"; // Default sort order
+
+        // Fetch and display data
+        function fetchData() {
+            const searchQuery = searchInput.value;
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", `user_employee_data.php?search=${encodeURIComponent(searchQuery)}&sort_order=${sortOrder}`, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const results = JSON.parse(xhr.responseText);
+                    displayResults(results);
+                }
+            };
+            xhr.send();
+        }
+
+        // Display results in the table
+        function displayResults(results) {
+            resultsTable.innerHTML = ""; // Clear previous results
+
+            if (results.length > 0) {
+                results.forEach(row => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${row.fullname}</td>
+                        <td>${row.position}</td>
+                        <td>${row.age}</td>
+                        <td>${row.street_address}</td>
+                        <td>${row.country}</td>
+                    `;
+                    resultsTable.appendChild(tr);
+                });
+            } else {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td colspan="5">No results found.</td>`;
+                resultsTable.appendChild(tr);
+            }
+        }
+
+        // Sort button functionality
+        sortButton.addEventListener("click", () => {
+            sortOrder = sortOrder === "asc" ? "desc" : "asc";
+            document.getElementById("sort_order").textContent = sortOrder === "asc" ? "⬇️" : "⬆️";
+            fetchData(); // Refetch the data with updated sort order
+        });
+
+        // Initial fetch of data
+        fetchData(); // Call the fetchData function on page load to show the initial results
+    </script>
 </body>
 </html>

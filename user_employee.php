@@ -3,8 +3,10 @@
 require "session.php";
 require "database.php";
 
+
 if(isset($_POST['delete'])){
-    $employee_id = (int)$_POST['delete_id'];
+    
+    $employee_id = (int)$_POST['deleted_id'];
 
     $query_delete_employee = "DELETE FROM employee WHERE id = $employee_id";
     if ($conn->query($query_delete_employee) === TRUE) {
@@ -49,7 +51,7 @@ if(isset($_POST['delete'])){
                         <img src="assets/default-prof.jpg" alt="" class="w-8 h-8 rounded-full">
                         <div>
                             <p><?=strtoupper($_SESSION['fullname'])?></p>
-                            <p class="text-[#999999]"><?=$_SESSION['position']?></p>
+                            <p class="text-[#999999]"><?=ucwords($_SESSION['position'])?></p>
                         </div>
                     </div>
                     <div class="self-center ml-2 rounded-full hover:bg-[#999999]">
@@ -96,9 +98,9 @@ if(isset($_POST['delete'])){
                 <p class="uppercase text-2xl font-bold text-left">Employees</p>
 
                 <div class="flex justify-between mt-5">
-                    <form action="" method="post" class="relative">
-                        <input type="text" placeholder="Search Employee..." name="search"
-                            class="w-[250px] px-11 py-2 rounded-lg text-md bg-[#29282F]  transition-all duration-200 ease-in-out outline-none opacity-80 focus:opacity-100 focus:w-[400px] hover:w-[400px]" />
+                    <!-- Search Bar -->
+                    <div class="relative">
+                        <input type="text" id="search" placeholder="Type to search..." onkeyup="fetchData()"  class="w-[250px] px-11 py-2 rounded-lg text-md bg-[#29282F]  transition-all duration-200 ease-in-out outline-none opacity-80 focus:opacity-100 focus:w-[400px] hover:w-[400px]" >
                         <svg fill="#ffffff" width="20px" height="20px" viewBox="0 0 1920 1920"
                             xmlns="http://www.w3.org/2000/svg"
                             class="absolute top-1/2 left-4 transform -translate-y-1/2">
@@ -106,15 +108,13 @@ if(isset($_POST['delete'])){
                                 d="M790.588 1468.235c-373.722 0-677.647-303.924-677.647-677.647 0-373.722 303.925-677.647 677.647-677.647 373.723 0 677.647 303.925 677.647 677.647 0 373.723-303.924 677.647-677.647 677.647Zm596.781-160.715c120.396-138.692 193.807-319.285 193.807-516.932C1581.176 354.748 1226.428 0 790.588 0S0 354.748 0 790.588s354.748 790.588 790.588 790.588c197.647 0 378.24-73.411 516.932-193.807l516.028 516.142 79.963-79.963-516.142-516.028Z"
                                 fill-rule="evenodd"></path>
                         </svg>
-                    </form>
-
-                    <form action="" method="post">
-                        <button type="submit" name="filter"
-                            class="flex items-center gap-2 py-2 px-3 bg-[#62F3FF] rounded-lg">
-                            <img src="assets/filter-icon.svg" alt="" class="">
-                            <span class="text-black font-semibold">Filter</span>
-                        </button>
-                    </form>
+                    </div>
+                                    
+                        
+                    <!-- Sort Button for Employee Name -->
+                    <button id="sort_button" class="flex items-center gap-2 py-2 px-3 bg-[#62F3FF] rounded-lg text-black font-semibold">
+                        Filter <img id="sort_order"src="assets/filter-icon.svg">
+                    </button>
                 </div>
             </div>
         </div>
@@ -122,81 +122,89 @@ if(isset($_POST['delete'])){
         <div class="w-[70%] mt-5">
             <!-- Scrollable rows -->
             <div class="overflow-y-auto h-[500px] custom-scroll relative">
-                <table class="w-full">
+                 <!-- Results Table -->
+                <table id="results_table" class="w-full">
                     <thead class="bg-[#29282F] text-left sticky top-0">
                         <tr>
-                            <th class="py-2 pl-2 border-r border-[#38373E] bg-transparent">Full name</th>
+                            <th class="py-2 pl-2 border-r border-[#38373E]">Full name</th>
                             <th class="py-2 pl-2 border-r border-[#38373E]">Email</th>
                             <th class="py-2 pl-2 border-r border-[#38373E]">Age</th>
                             <th class="py-2 pl-2 border-r border-[#38373E]">Full Address</th>
-                            <th class="py-2 pl-2">Actions</th>
+                            <th class="py-2 pl-2 border-r border-[#38373E]">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php
-                            if(isset($_POST['search'])){
-                                $employee_name = $_POST['search'];
-                                $search_employees = "SELECT * FROM employee WHERE `role` = 'employee' AND fullname LIKE '%$employee_name%'";
-                                $search_employee_result = $conn->query($search_employees);
-                                    
-                                if ($search_employee_result->num_rows > 0) {
-                                // output data of each row
-                                while($row = $search_employee_result->fetch_assoc()) {
-                        ?>
-                        <tr class="border border-[#29282F]">
-                           
-                            <td class="flex items-center gap-2 pl-2 py-3">
-                                <img src="assets/default-prof.jpg" alt="" class="h-10 w-10 rounded-full">
-                                <div class="flex flex-col leading-none">
-                                    <p class="text-md"><?=strtoupper($row['fullname'])?></p>
-                                    <p class="text-[#999999] text-sm"><?=$row['position']?></p>
-                                </div>
-                            </td>
-                            <td class="pl-2 py-2"><?=$row['email']?></td>
-                            <td class="pl-2 py-2"><?=$row['age']?></td>
-                            <td class="pl-2 py-2"><?=strtoupper($row['street_address']." ". $row['suburb']." ".$row['city']." ".$row['state']." ".$row['postcode']." ".$row['country'])?></td>
-                            <td class="pl-2 py-2">
-                                <form action="" method="post">
-                                    <input type="hidden" name="delete_id" value="<?=$row['id']?>">
-                                    <button type="submit" onclick="confirmAction(event)" name="delete" class="text-red-500 hover:underline">
-                                        Delete
-                                    </button>
-                                </form>
-                            </td>
+                        <tr>
+                            <td colspan="5">No data to display.</td>
                         </tr>
-                        <?php }}}else{
-                            $query_employees = "SELECT * FROM employee WHERE `role` = 'employee'";
-                            $employee_result = $conn->query($query_employees);
-                                 
-                            if ($employee_result->num_rows > 0) {
-                                // output data of each row
-                                while($row = $employee_result->fetch_assoc()) {
-                            
-                        ?>
-                            <tr class="border border-[#29282F]">
-                           
-                            <td class="flex items-center gap-2 pl-2 py-3">
-                                <img src="assets/default-prof.jpg" alt="" class="h-10 w-10 rounded-full">
-                                <div class="flex flex-col leading-none">
-                                    <p class="text-md"><?=strtoupper($row['fullname'])?></p>
-                                    <p class="text-[#999999] text-sm"><?=$row['position']?></p>
-                                </div>
-                            </td>
-                            <td class="pl-2 py-2"><?=$row['email']?></td>
-                            <td class="pl-2 py-2"><?=$row['age']?></td>
-                            <td class="pl-2 py-2"><?=strtoupper($row['street_address']." ". $row['suburb']." ".$row['city']." ".$row['state']." ".$row['postcode']." ".$row['country'])?></td>
-                            <td class="pl-2 py-2">
-                                <form action="" method="post">
-                                    <input type="hidden" name="delete_id" value="<?=$row['id']?>">
-                                    <button type="submit" onclick="confirmAction(event)" name="delete" class="text-red-500 hover:underline">
-                                        Delete
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        <?php }}}?>
                     </tbody>
                 </table>
+
+                <script>
+                    const searchInput = document.getElementById("search");
+                    const sortButton = document.getElementById("sort_button");
+                    const resultsTable = document.getElementById("results_table").getElementsByTagName("tbody")[0];
+                    let sortOrder = "asc"; // Default sort order
+
+                    // Fetch and display data
+                    function fetchData() {
+                        const searchQuery = searchInput.value;
+
+                        const xhr = new XMLHttpRequest();
+                        xhr.open("GET", `user_employee_data.php?search=${encodeURIComponent(searchQuery)}&sort_order=${sortOrder}`, true);
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                const results = JSON.parse(xhr.responseText);
+                                displayResults(results);
+                            }
+                        };
+                        xhr.send();
+                    }
+
+                    // Display results in the table
+                    function displayResults(results) {
+                        resultsTable.innerHTML = ""; // Clear previous results
+
+                        if (results.length > 0) {
+                            results.forEach(row => {
+                                const tr = document.createElement("tr");
+                                tr.innerHTML = `
+                                    <td class="flex items-center gap-2 pl-2 py-3 border-y border-l border-[#29282F]">
+                                        <img src="assets/default-prof.jpg" alt="" class="h-10 w-10 rounded-full">
+                                        <div class="flex flex-col leading-none"> 
+                                            <p class="text-md">${row.fullname}</p>
+                                            <p class="text-[#999999] text-sm">${row.position}</p>
+                                        </div>
+                                    </td>
+                                    <td class='pl-2 py-2 border-y border-[#29282F]'>${row.email}</td>
+                                    <td class='pl-2 py-2 border-y border-[#29282F]'>${row.age}</td>
+                                    <td class='pl-2 py-2 border-y border-[#29282F]'>${row.street_address+" "+row.street_address+" "+row.street_address+" "+row.street_address+" "+row.street_address}</td>
+                                    <td class='pl-2 py-2 border-y border-r border-[#29282F]'>
+                                        <form action="" method="post">
+                                            <input type="hidden" name="deleted_id" value="${row.id}">
+                                            <button type="submit" name="delete" onclick="confirmAction(event)" class="text-red-500 hover:underline">Delete</button>
+                                        </form>
+                                    </td>
+                                `;
+                                resultsTable.appendChild(tr);
+                            });
+                        } else {
+                            const tr = document.createElement("tr");
+                            tr.innerHTML = `<td colspan="5">No results found.</td>`;
+                            resultsTable.appendChild(tr);
+                        }
+                    }
+
+                    // Sort button functionality
+                    sortButton.addEventListener("click", () => {
+                        sortOrder = sortOrder === "asc" ? "desc" : "asc";
+                        document.getElementById("sort_order").textContent = sortOrder === "asc" ? "⬇️" : "⬆️";
+                        fetchData(); // Refetch the data with updated sort order
+                    });
+
+                    // Initial fetch of data
+                    fetchData(); // Call the fetchData function on page load to show the initial results
+                </script>
             </div>
         </div>
     </main>

@@ -1,8 +1,5 @@
 <?php
-
-require "session.php";
-
-
+    require "session.php";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -38,7 +35,7 @@ require "session.php";
                         <img src="assets/default-prof.jpg" alt="" class="w-8 h-8 rounded-full">
                         <div>
                             <p><?=strtoupper($_SESSION['fullname'])?></p>
-                            <p class="text-[#999999]"><?=$_SESSION['position']?></p>
+                            <p class="text-[#999999]"><?=ucwords($_SESSION['position'])?></p>
                         </div>
                     </div>
                     <div class="self-center ml-2 rounded-full hover:bg-[#999999]">
@@ -86,9 +83,9 @@ require "session.php";
                 <p class="uppercase text-2xl font-bold text-left">Employees History</p>
 
                 <div class="flex justify-between mt-5">
-                    <form action="" method="post" class="relative">
-                        <input type="text" placeholder="Search Employee..." name="search"
-                            class="w-[250px] px-11 py-2 rounded-lg text-md bg-[#29282F]  transition-all duration-200 ease-in-out outline-none opacity-80 focus:opacity-100 focus:w-[400px] hover:w-[400px]" />
+                    <!-- Search Bar -->
+                    <div class="relative">
+                        <input type="text" id="search" placeholder="Type to search..."  class="w-[250px] px-11 py-2 rounded-lg text-md bg-[#29282F]  transition-all duration-200 ease-in-out outline-none opacity-80 focus:opacity-100 focus:w-[400px] hover:w-[400px]" >
                         <svg fill="#ffffff" width="20px" height="20px" viewBox="0 0 1920 1920"
                             xmlns="http://www.w3.org/2000/svg"
                             class="absolute top-1/2 left-4 transform -translate-y-1/2">
@@ -96,105 +93,124 @@ require "session.php";
                                 d="M790.588 1468.235c-373.722 0-677.647-303.924-677.647-677.647 0-373.722 303.925-677.647 677.647-677.647 373.723 0 677.647 303.925 677.647 677.647 0 373.723-303.924 677.647-677.647 677.647Zm596.781-160.715c120.396-138.692 193.807-319.285 193.807-516.932C1581.176 354.748 1226.428 0 790.588 0S0 354.748 0 790.588s354.748 790.588 790.588 790.588c197.647 0 378.24-73.411 516.932-193.807l516.028 516.142 79.963-79.963-516.142-516.028Z"
                                 fill-rule="evenodd"></path>
                         </svg>
-                    </form>
-
-                    <form action="" method="post" class="flex items-center gap-5">
-                        <select name="date" id="" class="text-black outline-none bg-[#62F3FF] py-2 px-5 rounded-lg font-semibold">
-                            <option value="" class="bg-white">Today</option>
-                            <option value="" class="bg-white">Today</option>
-                            <option value="" class="bg-white">Today</option>
-                            <option value="" class="bg-white">Today</option>
-                            
+                    </div>
+                                    
+                    <div  class="flex items-center gap-5">
+                        <select id="filter_date" class="text-black outline-none bg-[#62F3FF] py-2 px-5 rounded-lg font-semibold">
+                            <option value="" class="bg-[#29282F] text-white"> All Dates </option>
                         </select>
-                        <button type="submit" name="filter"
-                            class="flex items-center gap-2 py-2 px-3 bg-[#62F3FF] rounded-lg">
-                            <img src="assets/filter-icon.svg" alt="" class="">
-                            <span class="text-black font-semibold">Filter</span>
+                        
+                        <!-- Sort Button for Employee Name -->
+                        <button id="sort_button" class="flex items-center gap-2 py-2 px-3 bg-[#62F3FF] rounded-lg text-black font-semibold">
+                            Filter <img id="sort_order"src="assets/filter-icon.svg">
                         </button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="w-[70%] mt-5">
             <div class="overflow-y-auto h-[500px] custom-scroll relative">
-                <table class="w-full">
-                    <thead class="bg-[#29282F] text-left  sticky top-0">
+                <table id="results_table" class="w-full">
+                    <thead class="bg-[#29282F] text-left sticky top-0">
                         <tr>
-                            <th class="py-2 pl-2 border-r border-[#38373E] bg-transparent">Full name</th>
-                            <th class="py-2 pl-2 border-r border-[#38373E]">Tiime Started</th>
-                            <th class="py-2 pl-2 border-r border-[#38373E]">Tiime Ended</th>
-                            <th class="py-2 pl-2 border-r border-[#38373E]">Total Hours</th>
+                            <th class="py-2 pl-2 border-r border-[#38373E]">Fullname</th>
+                            <th class="py-2 pl-2 border-r border-[#38373E]">Time_Consumed</th>
                             <th class="py-2 pl-2 border-r border-[#38373E]">Over Time</th>
                             <th class="py-2 pl-2 border-r border-[#38373E]">Date</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="border border-[#29282F]">
-                            <td class="flex items-center gap-2 pl-2 py-3">
-                                <img src="assets/default-prof.jpg" alt="" class="h-10 w-10 rounded-full">
-                                <div class="flex flex-col leading-none">
-                                    <p class="text-md">Carlo Garcia</p>
-                                    <p class="text-[#999999] text-sm">Developer</p>
-                                </div>
-                            </td>
-                            <td class="pl-2 py-2">8:00 am</td>
-                            <td class="pl-2 py-2">5:00 pm</td>
-                            <td class="pl-2 py-2">8:00</td>
-                            <td class="pl-2 py-2">2:00</td>
-                            <td class="pl-2 py-2">12/07/2024</td>
-                            
-                        </tr>
-
-                        <tr class="border border-[#29282F]">
-                            <td class="flex items-center gap-2 pl-2 py-3">
-                                <img src="assets/default-prof.jpg" alt="" class="h-10 w-10 rounded-full">
-                                <div class="flex flex-col leading-none">
-                                    <p class="text-md">Carlo Garcia</p>
-                                    <p class="text-[#999999] text-sm">Developer</p>
-                                </div>
-                            </td>
-                            <td class="pl-2 py-2">8:00 am</td>
-                            <td class="pl-2 py-2">5:00 pm</td>
-                            <td class="pl-2 py-2">8:00</td>
-                            <td class="pl-2 py-2">2:00</td>
-                            <td class="pl-2 py-2">12/07/2024</td>
-                            
-                        </tr>
-
-                        <tr class="border border-[#29282F]">
-                            <td class="flex items-center gap-2 pl-2 py-3">
-                                <img src="assets/default-prof.jpg" alt="" class="h-10 w-10 rounded-full">
-                                <div class="flex flex-col leading-none">
-                                    <p class="text-md">Carlo Garcia</p>
-                                    <p class="text-[#999999] text-sm">Developer</p>
-                                </div>
-                            </td>
-                            <td class="pl-2 py-2">8:00 am</td>
-                            <td class="pl-2 py-2">5:00 pm</td>
-                            <td class="pl-2 py-2">8:00</td>
-                            <td class="pl-2 py-2">2:00</td>
-                            <td class="pl-2 py-2">12/07/2024</td>
-                            
-                        </tr>
-
-                        <tr class="border border-[#29282F]">
-                            <td class="flex items-center gap-2 pl-2 py-3">
-                                <img src="assets/default-prof.jpg" alt="" class="h-10 w-10 rounded-full">
-                                <div class="flex flex-col leading-none">
-                                    <p class="text-md">Carlo Garcia</p>
-                                    <p class="text-[#999999] text-sm">Developer</p>
-                                </div>
-                            </td>
-                            <td class="pl-2 py-2">8:00 am</td>
-                            <td class="pl-2 py-2">5:00 pm</td>
-                            <td class="pl-2 py-2">8:00</td>
-                            <td class="pl-2 py-2">2:00</td>
-                            <td class="pl-2 py-2">12/07/2024</td>
-                            
+                        <tr>
+                            <td colspan="5">No data to display.</td>
                         </tr>
                     </tbody>
                 </table>
+
+                <script>
+                    const searchInput = document.getElementById("search");
+                    const filterDateSelect = document.getElementById("filter_date");
+                    const sortButton = document.getElementById("sort_button");
+                    const resultsTable = document.getElementById("results_table").getElementsByTagName("tbody")[0];
+                    let sortOrder = "asc"; // Default sort order
+
+                    // Fetch and populate the date dropdown from the database
+                    function populateDateDropdown() {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open("GET", "employee_history_data.php?action=get_dates", true);
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                const dates = JSON.parse(xhr.responseText);
+                                dates.forEach(dateObj => {
+                                    const option = document.createElement("option");
+                                    option.value = dateObj.date;
+                                    option.textContent = dateObj.date;
+                                    option.style.backgroundColor = "#29282F"; 
+                                    option.style.color = "white"; 
+                                    filterDateSelect.appendChild(option);
+                                });
+                            }
+                        };
+                        xhr.send();
+                    }
+
+                    // Fetch and display data
+                    function fetchData() {
+                        const searchQuery = searchInput.value;
+                        const filterDate = filterDateSelect.value;
+
+                        const xhr = new XMLHttpRequest();
+                        xhr.open("GET", `employee_history_data.php?search=${encodeURIComponent(searchQuery)}&filter_date=${encodeURIComponent(filterDate)}&sort_order=${sortOrder}`, true);
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                const results = JSON.parse(xhr.responseText);
+                                displayResults(results);
+                            }
+                        };
+                        xhr.send();
+                    }
+
+                    // Display results in the table
+                    function displayResults(results) {
+                        resultsTable.innerHTML = ""; // Clear previous results
+
+                        if (results.length > 0) {
+                            results.forEach(row => {
+                                const tr = document.createElement("tr");
+                                tr.innerHTML = `
+                                    <td class="flex items-center gap-2 pl-2 py-3 border-y border-l border-[#29282F]">
+                                        <img src="assets/default-prof.jpg" alt="" class="h-10 w-10 rounded-full">
+                                        <div class="flex flex-col leading-none"> 
+                                            <p class="text-md">${row.fullname}</p>
+                                            <p class="text-[#999999] text-sm">${row.position}</p>
+                                        </div>
+                                    </td>
+                                    <td class='pl-2 py-2 border-y border-[#29282F]'>${row.time_consumed}</td>
+                                    <td class='pl-2 py-2 border-y border-[#29282F]'>${row.over_time}</td>
+                                    <td class='pl-2 py-2 border-y border-r border-[#29282F]'>${row.date}</td>
+                                `;
+                                resultsTable.appendChild(tr);
+                            });
+                        } else {
+                            const tr = document.createElement("tr");
+                            tr.innerHTML = `<td colspan="5">No results found.</td>`;
+                            resultsTable.appendChild(tr);
+                        }
+                    }
+
+                    // Event Listeners
+                    searchInput.addEventListener("input", fetchData);
+                    filterDateSelect.addEventListener("change", fetchData);
+                    sortButton.addEventListener("click", () => {
+                        sortOrder = sortOrder === "asc" ? "desc" : "asc";
+                        document.getElementById("sort_order").textContent = sortOrder === "asc" ? "⬇️" : "⬆️";
+                        fetchData();
+                    });
+
+                    // Initial fetch of dates and data
+                    populateDateDropdown();
+                    fetchData();
+                </script>
             </div>
         </div>
     </main>
